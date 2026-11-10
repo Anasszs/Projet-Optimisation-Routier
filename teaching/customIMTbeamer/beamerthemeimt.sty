@@ -1,0 +1,335 @@
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	PACKAGE OPTIONS & SETUP
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\ProvidesPackage{beamerthemeimt}
+
+\newif\if@useTitleProgressBar
+\@useTitleProgressBarfalse
+\DeclareOptionBeamer{progressbar}{\@useTitleProgressBartrue}
+
+\newif\if@protectFrameTitle
+\@protectFrameTitlefalse
+\DeclareOptionBeamer{protectframetitle}{\@protectFrameTitletrue}
+
+\newif\if@dofullfooter
+\@dofullfooterfalse
+\DeclareOptionBeamer{fullfooter}{\@dofullfootertrue}
+
+\newif\if@donumfooter
+\@donumfooterfalse
+\DeclareOptionBeamer{numfooter}{\@donumfootertrue}
+
+\newif\if@donewPxFont
+\@donewPxFontfalse
+\DeclareOptionBeamer{newPxFont}{\@donewPxFonttrue}
+
+\newif\if@dovaligncolumns
+\@dovaligncolumnsfalse
+\DeclareOptionBeamer{dovaligncolumns}{\@dovaligncolumnstrue}
+
+\newif\if@dosectionpages
+\@dosectionpagesfalse
+\DeclareOptionBeamer{sectionpages}{\@dosectionpagestrue}
+
+% \newif\if@dotitlev1
+% \@dotitlev1false
+% \DeclareOptionBeamer{titlev1}{\@dotitlev1true}
+
+% \newif\if@dotitlev2
+% \@dotitlev2false
+% \DeclareOptionBeamer{titlev2}{\@dotitlev2true}
+
+% \newif\if@dotitlev3
+% \@dotitlev3false
+% \DeclareOptionBeamer{titlev3}{\@dotitlev3true}
+
+\DeclareOptionBeamer{nooffset}{\setlength{\@imt@voffset}{0em}}
+
+\newlength{\@imt@voffset}
+\setlength{\@imt@voffset}{0em}
+
+\ProcessOptionsBeamer
+\mode<presentation>
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	02: REQUIRED PACKAGES
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+\RequirePackage{xcolor}
+\RequirePackage{tikz}
+\RequirePackage{booktabs}
+\RequirePackage{tabularx}
+\RequirePackage{ragged2e}
+\RequirePackage[yyyymmdd]{datetime}
+\usetikzlibrary{backgrounds}
+\RequirePackage{geometry}
+\RequirePackage{needspace}
+\RequirePackage{hyperref}
+% \hypersetup{colorlinks=true}
+\RequirePackage{fancyhdr}
+\usetikzlibrary{
+  calc,
+  decorations.pathmorphing,
+  fadings,
+  shadows,
+  shapes.geometric,
+  shapes.misc,
+  positioning
+}
+\usepackage{eso-pic}
+\usepackage[absolute]{textpos}
+% \usepackage{showframe}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	COLOR AND FONT THEMES (BEAMER)
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\usepackage{customIMTbeamer/beamercolorthemeimt}
+\usepackage{customIMTbeamer/beamerfontthemeimt}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	TITLE PAGE
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\def\maketitle{\ifbeamer@inframe\titlepage\else\frame{\titlepage}\fi}
+
+\def\titlepage{\usebeamertemplate{title page}}
+\setbeamertemplate{title page}
+{    
+    \begin{tikzpicture}[overlay,top color=white,bottom color=gray]
+        \node[inner sep=0,yshift=-1em] (A) at (.325\paperwidth,-0.035\paperheight) {
+         \begin{minipage}{.65\paperwidth}
+    	{\raggedright\linespread{1.0}\usebeamerfont{title}\usebeamercolor[fg]{title page}{\inserttitle}\par}\vspace{-1.em}
+        
+        {\raggedright\usebeamerfont{subtitle}\usebeamercolor[fg]{title page}{\insertsubtitle}\par}%
+         \end{minipage}
+    	};
+
+    \draw node [inner sep=0, below of=A, yshift=-2em, xshift=-12.5em] (B) {
+    	\begin{minipage}{.15\paperwidth}
+			{\usebeamerfont{date}\usebeamercolor[fg]{date}\footnotesize{\textbf{\insertdate}}\par}
+    	\end{minipage}
+    };     
+
+    \draw node [inner sep=0, below of=A, yshift=-2em, xshift=6em] (C) {
+    	\begin{minipage}{.41\paperwidth}
+   		\ifx\insertinstitut\@empty%
+    		\else%
+    		{\raggedleft\usebeamerfont{author}\usebeamercolor[fg]{author}\textbf{\footnotesize \insertauthor}\par}%
+    		\fi%
+    	\end{minipage}
+    };     
+        \draw node [inner sep=0, below of=C, xshift=-3.5em, yshift=-4em] (E) {
+    	\begin{minipage}{.5\paperwidth}
+   		\ifx\insertinstitut\@empty%
+    		\else%
+    		{\raggedright\usebeamerfont{institute}\usebeamercolor[fg]{title page}\insertinstitute\par}%
+    		\fi%
+    	\end{minipage}
+    };     
+    \end{tikzpicture}
+}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	TABLE OF CONTENTS
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\setbeamertemplate{section in toc}{
+\raggedleft
+\usebeamerfont{section in toc}\vspace{.5em}
+\inserttocsectionnumber.~\inserttocsection\par
+
+}
+\setbeamertemplate{subsection in toc}{
+	\tiny
+    \raggedleft
+    \usebeamerfont{subsection in toc}
+\inserttocsectionnumber.\inserttocsubsectionnumber.~\inserttocsubsection\par
+}
+\setbeamertemplate{subsubsection in toc}{}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+% SECTION PAGES
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\if@dosectionpages
+\newcommand{\insertsectionHEAD}{%
+  \expandafter\insertsectionHEADaux\insertsectionhead}
+  \newcommand{\insertsectionHEADaux}[3]{#3}
+
+\AtBeginSection[]
+{
+  \begingroup
+  \usebackgroundtemplate{
+    	\begin{tikzpicture}[very thick,top color=white,bottom color=gray]
+    		\fill[white] (0,0) rectangle (\paperwidth,\paperheight);
+        \fill[imtGrey] (0,\paperheight) -- (.7\paperheight,\paperheight) -- (0,.3\paperheight) -- cycle;
+    	\fill[imtBlue] (0,0) -- (.45\paperheight,0) -- (0,.45\paperheight) -- cycle;
+        \fill[color=imtRed] (.925\paperwidth,.5\paperheight) -- (\paperwidth,\paperheight/2+.15\paperheight) -- (\paperwidth,\paperheight/2-.15\paperheight) -- cycle;
+        \node[xshift=-10em] (A) at (.8\paperwidth,.5\paperheight) {
+        \begin{minipage}{.6\paperwidth}
+        \raggedleft\usebeamerfont{title}\usebeamercolor[fg]{title page}\insertsectionHEAD
+        \end{minipage}
+        };
+    	\end{tikzpicture}
+    }
+  \setbeamercolor{background canvas}{parent=palette tertiary}
+  \begin{frame}[plain]
+    \hfill\usebeamerfont{section title}
+  \end{frame}
+  \endgroup
+  \usebackgroundtemplate{}
+}
+\else
+\fi
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	Tables
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+    \newenvironment{imttable}[1]
+        {%
+        \SetTblrInner{rowsep=2pt,colsep=16pt}
+        \begin{tblr}{
+                colspec={#1},
+                hlines={fg=white, wd=.6pt}, 
+                vlines={fg=white, wd=.6pt},
+                cell{even}{odd} = {bg=imtBlue!8, font=\footnotesize},
+                cell{even}{even} = {bg=imtRed!8, font=\footnotesize},
+                cell{odd}{odd} = {bg=imtBlue!20, font=\footnotesize},
+                cell{odd}{even} = {bg=imtRed!20, font=\footnotesize},
+                cell{1}{odd}={bg=imtBlue, fg=white, font=\small\bfseries},
+                cell{1}{even}={bg=imtRed, fg=white, font=\small\bfseries},
+            }%
+        }%
+        {%
+        \end{tblr}%
+        }%
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	ITEMIZE
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+\setbeamertemplate{itemize item}{\tikz{\fill[imtRed] (0,.23) -- (.23,.23) -- (0,0)--cycle;}}
+\setbeamertemplate{itemize subitem}{\tikz{\fill[imtBlue] (0.05,.2) -- (.05,0) -- (0.12,0.10)--cycle; \fill[imtRed] (0,.2) -- (0,0) -- (0.08,0.10)--cycle;}}
+\setbeamertemplate{itemize subsubitem}{{\scriptsize$\color{imtBlue}\bullet$}}
+\setlength{\parskip}{0.5em}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FOOTLINE
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\usenavigationsymbolstemplate{}
+
+\newcommand{\addfootline}{
+ %==== REPOSITIONING FOOTLINE
+	\setbeamertemplate{footline}{
+    \begin{tikzpicture}[very thick,top color=white,bottom color=gray,overlay, remember picture]
+        \draw[imtRed, thin] (0, .11\paperheight) -- (.95\paperwidth, .11\paperheight) -- (.88\paperwidth,0);
+        \draw[imtBlue, thin] (.91\paperwidth, .02\paperheight) -- (.988\paperwidth, 0.02\paperheight) -- (.988\paperwidth, .15\paperheight) -- cycle;
+        \node (fnum) at (.965\paperwidth, .06\paperheight){\usebeamerfont{page number in head/foot}\insertframenumber};
+        \node (logos) at (.3\paperheight, .055\paperheight) {\includegraphics[height=0.07\paperheight]{customIMTbeamer/logos/logo_imt_ales.png}\qquad\includegraphics[height=0.07\paperheight]{customIMTbeamer/logos/Logo2IA.png}};
+        \node[xshift=-19em, yshift=-.25em] (footlinetext) at (fnum.west) {
+        \begin{minipage}{.3\paperwidth}
+        \raggedleft\usebeamerfont{page number in head/foot}\insertshorttitle ~/~ \insertdate
+        \end{minipage}
+        };
+    \end{tikzpicture}
+}
+}
+\newcommand{\removefootline}{\setbeamertemplate{footline}{}}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	CAPTIONS
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+\setbeamertemplate{caption label separator}{: }
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FRAME TITLE
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\newcommand{\addheadline}{
+\setbeamertemplate{headline}{
+ \begin{tikzpicture}[overlay, remember picture, baseline=4.5em]
+    \fill[imtRed] (0, 0) -- (0, 0.08\paperheight) -- (0.04\paperheight, 0.04\paperheight) -- cycle;
+    \node[anchor=west, xshift=3em, yshift=2em] {\usebeamerfont{section in head/foot}\color{imtRed} \textbf{\insertsectionhead}%
+    \ifdefvoid{\insertsubsection}{}{%
+        ~~\tikz{\fill[imtRed, yshift=4.45em] (0,0) -- (0.0625, 0.125) -- (0,0.25) -- (0.125, 0.125) -- cycle;}~\insertsubsectionhead}
+    };
+ \end{tikzpicture}
+}
+}
+
+\setbeamertemplate{frametitle}{\vskip .5em \hspace{-1.1em}\bfseries\color{imtBlue}\usebeamerfont{frametitle}\insertframetitle\vskip -2em}
+
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	IMAGES
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+\newbox\mytempbox
+\newdimen\mytempdimen
+
+\newcommand\includegraphicscopyright[3][]{%
+  \leavevmode\vbox{\vskip3pt\raggedright\setbox\mytempbox=\hbox{\includegraphics[#1]{#2}}%
+    \mytempdimen=\wd\mytempbox\box\mytempbox\par\vskip1pt%
+    \usebeamerfont{copyright text}{\usebeamercolor[fg]{copyright text}{\vbox{\hsize=\mytempdimen#3}}}\vskip3pt%
+}}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	BLOCKS
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+\newlength{\imt@blocksep}
+\newlength{\imt@blockadjust}
+\setlength{\imt@blocksep}{0.75ex}
+\setlength{\imt@blockadjust}{0.25ex}
+\providecommand{\imt@strut}{%
+  \vphantom{ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz()}%
+}
+\newcommand{\imt@block}[1]{
+  \par\vskip\medskipamount%
+  \setlength{\parskip}{2pt}
+  \ifbeamercolorempty[bg]{block title#1}{%
+    \begin{beamercolorbox}[rightskip=0pt plus 4em]{block title#1}}{%
+  \ifbeamercolorempty[bg]{block title}{%
+    \begin{beamercolorbox}[rightskip=0pt plus 4em]{block title#1}%
+  }%
+  {%
+    \begin{beamercolorbox}[
+      sep=\dimexpr\imt@blocksep-\imt@blockadjust\relax,
+      leftskip=\imt@blockadjust,
+      rightskip=\dimexpr\imt@blockadjust plus 4em\relax
+    ]{block title#1}%
+  }}%
+      \usebeamerfont*{block title#1}%
+      \imt@strut%
+      \insertblocktitle%
+      \imt@strut%
+  \end{beamercolorbox}%
+  \nointerlineskip%
+  \ifbeamercolorempty[bg]{block body#1}{%
+    \begin{beamercolorbox}[vmode]{block body#1}}{
+  \ifbeamercolorempty[bg]{block body}{%
+    \begin{beamercolorbox}[vmode]{block body#1}%
+  }{%
+    \begin{beamercolorbox}[sep=\imt@blocksep, vmode]{block body#1}%
+    \vspace{-\imt@parskip}
+  }}%
+      \usebeamerfont{block body#1}%
+      \setlength{\parskip}{\imt@parskip}%
+}
+\setbeamertemplate{block begin}{\imt@block{}}
+\setbeamertemplate{block alerted begin}{\imt@block{ alerted}}
+\setbeamertemplate{block example begin}{\imt@block{ example}}
+\setbeamertemplate{block end}{\end{beamercolorbox}\vspace*{0.2ex}}
+\setbeamertemplate{block alerted end}{\end{beamercolorbox}\vspace*{0.2ex}}
+\setbeamertemplate{block example end}{\end{beamercolorbox}\vspace*{0.2ex}}
+\setbeamertemplate{blocks}[rounded][shadow=true]
+
+\newlength{\imt@parskip}
+\setlength{\imt@parskip}{0.5em}
+\setlength{\parskip}{\imt@parskip}
+\mode
+<all>
+
+\let\otp\titlepage
+\renewcommand{\titlepage}{\otp\addtocounter{framenumber}{-1}}
+%\newcommand{\mreducelistspacing}{\vspace{-\topsep}}
+
+\linespread{1.15}

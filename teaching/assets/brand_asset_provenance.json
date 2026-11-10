@@ -1,0 +1,63 @@
+{
+  "source_filename": "imt_charte_imtales_oct(2).pdf",
+  "source_sha256": "ef6e903981441f098381dcdcf5b09f81a7d03a5bec0708adce7a3c560d21d539",
+  "source_pdf_page": 1,
+  "source_printed_page": "cover",
+  "extraction": "PDF clipping of original vector artwork, no redraw or recoloring",
+  "clearspace": "H/2 on each outer side, where H is original tangram height",
+  "tangram_height_source_pt": 37.41597999999999,
+  "assets": {
+    "imt_mines_ales_block": {
+      "source_artwork_bounds_pt": [
+        56.692995,
+        470.77002,
+        267.907,
+        538.826
+      ],
+      "source_crop_bounds_pt": [
+        37.98500500000001,
+        452.06203,
+        286.61499,
+        557.53399
+      ],
+      "asset_size_pt": [
+        248.62998499999998,
+        105.47196000000002
+      ],
+      "school_logo_ink_width_pt": 130.951005,
+      "minimum_asset_print_width_mm": 37.972978519714296,
+      "recommended_print_width_mm": 52,
+      "files": [
+        "imt_mines_ales_block.pdf",
+        "imt_mines_ales_block.svg",
+        "imt_mines_ales_block.png"
+      ]
+    },
+    "imt_mines_ales_logo": {
+      "source_artwork_bounds_pt": [
+        56.692995,
+        470.77002,
+        187.644,
+        538.826
+      ],
+      "source_crop_bounds_pt": [
+        37.98500500000001,
+        452.06203,
+        206.35199,
+        557.53399
+      ],
+      "asset_size_pt": [
+        168.366985,
+        105.47196000000002
+      ],
+      "school_logo_ink_width_pt": 130.951005,
+      "minimum_asset_print_width_mm": 25.714500625634752,
+      "recommended_print_width_mm": 30,
+      "files": [
+        "imt_mines_ales_logo.pdf",
+        "imt_mines_ales_logo.svg",
+        "imt_mines_ales_logo.png"
+      ]
+    }
+  }
+}

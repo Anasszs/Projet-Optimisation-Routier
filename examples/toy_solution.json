@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "instance": "toy",
+  "main_route": [0, 1, 2, 0],
+  "truck_routes": [
+    {"satellite": 1, "customers": [3, 4]},
+    {"satellite": 2, "customers": [5]},
+    {"satellite": 2, "customers": [6]}
+  ],
+  "metadata": {"method": "Worked example", "description": "Main cost16; truck-only cost25.54982318546315; total41.54982318546315"}
+}

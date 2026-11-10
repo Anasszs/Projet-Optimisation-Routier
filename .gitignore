@@ -1,0 +1,27 @@
+# Local Python environments and caches.
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Generated solver solutions, benchmark campaigns and local grading data.
+/output/
+/instructor/
+
+# LaTeX build intermediates; the supplied PDFs remain versioned.
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.nav
+*.out
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+
+# Desktop metadata.
+.DS_Store
+Thumbs.db
+Desktop.ini

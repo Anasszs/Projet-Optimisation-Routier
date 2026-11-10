@@ -1,0 +1,12 @@
+# Keep portable source/configuration files stable across checkouts.
+* text=auto eol=lf
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+
+# Preserve the original supplied template and benchmark source bytes exactly.
+teaching/customIMTbeamer/** -text
+sources/benchmark_README.txt -text
+instances/public/*.json -text
+instances/public_manifest.json -text

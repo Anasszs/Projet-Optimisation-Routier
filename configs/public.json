@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "title": "Public practice comparison",
+  "instance_glob": "../instances/public/*.json",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "time_limit": 30,
+  "baseline_name": "Reference nearest",
+  "notes": "Course practice uses the fixed 30-second budget. Replace the ranked starter entry with your own Session 1 greedy solver, then add your Session 2 local search and Session 3 metaheuristic variants for comparison. The unranked nearest-neighbour reference does not determine marks.",
+  "solvers": [
+    {
+      "name": "Reference nearest",
+      "cwd": "..",
+      "command": [
+        "{python}",
+        "-m",
+        "sttrpsd",
+        "baseline",
+        "--instance",
+        "{instance}",
+        "--solution",
+        "{solution}",
+        "--seed",
+        "{seed}",
+        "--time-limit",
+        "{time_limit}",
+        "--method",
+        "nearest"
+      ],
+      "include_in_ranking": false
+    },
+    {
+      "name": "Starter random",
+      "cwd": "..",
+      "command": [
+        "{python}",
+        "-m",
+        "sttrpsd",
+        "baseline",
+        "--instance",
+        "{instance}",
+        "--solution",
+        "{solution}",
+        "--seed",
+        "{seed}",
+        "--time-limit",
+        "{time_limit}",
+        "--method",
+        "random"
+      ],
+      "include_in_ranking": true
+    }
+  ]
+}

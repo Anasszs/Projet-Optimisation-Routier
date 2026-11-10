@@ -1,0 +1,55 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{imt_course}[2026/11/10 IMT Mines Ales course identity]
+\RequirePackage{iftex}
+\RequirePackage{xcolor}
+\RequirePackage{graphicx}
+\RequirePackage{tikz}
+\usetikzlibrary{calc,arrows.meta}
+% Digital colour values printed in the October 2024 charter, page 14.
+\definecolor{IMTCyan}{HTML}{00B8DE}
+\definecolor{IMTPink}{HTML}{F14862}
+\definecolor{IMTNavy}{HTML}{14223C}
+\definecolor{IMTGrey}{HTML}{EDF3F4}
+\colorlet{navy}{IMTNavy}
+\colorlet{teal}{IMTCyan}
+\colorlet{rust}{IMTPink}
+% Helvetica is prescribed by the charter. Arial is the permitted office
+% substitute. pdfLaTeX uses the standard Helvetica-compatible Nimbus Sans;
+% XeLaTeX/LuaLaTeX prefer the prescribed fonts when locally installed.
+\ifPDFTeX
+  \RequirePackage[T1]{fontenc}
+  \RequirePackage[utf8]{inputenc}
+  \RequirePackage[scaled=0.96]{helvet}
+  \renewcommand{\familydefault}{\sfdefault}
+\else
+  \RequirePackage{fontspec}
+  \IfFontExistsTF{Helvetica}{
+    \setmainfont{Helvetica}\setsansfont{Helvetica}
+  }{\IfFontExistsTF{Arial}{
+    \setmainfont{Arial}\setsansfont{Arial}
+  }{\IfFontExistsTF{Nimbus Sans}{
+    \setmainfont{Nimbus Sans}\setsansfont{Nimbus Sans}
+  }{\setmainfont{TeX Gyre Heros}\setsansfont{TeX Gyre Heros}}}}
+  \renewcommand{\familydefault}{\sfdefault}
+\fi
+% BIMER pairs bold sans-serif headings with a light serif display face.
+% Use installed Archer where available; the supplied PDFs use LM Roman.
+\ifPDFTeX
+  \newcommand{\IMTDisplay}{\fontfamily{lmr}\fontseries{m}\selectfont}
+\else
+  \IfFontExistsTF{Archer Light}{
+    \newfontfamily\IMTDisplay{Archer Light}
+  }{\newfontfamily\IMTDisplay{Latin Modern Roman}}
+\fi
+\graphicspath{{assets/}{teaching/assets/}}
+% Original vector marks are clipped from the supplied charter, without
+% redrawing. Their canvases include the charter's external protection space.
+\newcommand{\IMTLogo}[1][30mm]{\includegraphics[width=#1]{imt_mines_ales_logo.pdf}}
+\newcommand{\IMTBlock}[1][60mm]{\includegraphics[width=#1]{imt_mines_ales_block.pdf}}
+\newcommand{\IMTSmallTriangles}{%
+  \begin{tikzpicture}[x=1mm,y=1mm,baseline=0pt]
+    \fill[IMTCyan] (0,0)--(6,0)--(0,6)--cycle;
+    \fill[IMTPink] (8,0)--(14,0)--(14,6)--cycle;
+  \end{tikzpicture}%
+}
+\endinput

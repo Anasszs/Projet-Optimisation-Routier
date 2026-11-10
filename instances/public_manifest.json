@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "instance_count": 10,
+  "marginals": {
+    "customers": {
+      "100": 2,
+      "200": 2,
+      "25": 3,
+      "50": 3
+    },
+    "geometry": {
+      "c": 5,
+      "rd": 5
+    },
+    "truck_capacity": {
+      "1000": 5,
+      "2000": 5
+    },
+    "satellites": {
+      "10": 5,
+      "20": 2,
+      "5": 3
+    }
+  },
+  "instances": [
+    {
+      "file": "STTRP-100-20-1-rd.json",
+      "name": "STTRP-100-20-1-rd",
+      "sha256": "57131a5f6b1d4417cbc8b3acc39029249ed07e84a55350e4061558824f7f4a7d",
+      "customers": 100,
+      "satellites": 20,
+      "truck_capacity": "1000",
+      "geometry": "rd",
+      "customer_layout_sha256": "08bdb39747dc47d71a9356ecd31ab6ea8238fa125a795cfe00a05094056cd894",
+      "full_layout_sha256": "7c8e7a4b96bcfa7696d0860d6b2ffd5ca65afff8e9d316d7b9841812a8a4f1de"
+    },
+    {
+      "file": "STTRP-100-20-2-rd.json",
+      "name": "STTRP-100-20-2-rd",
+      "sha256": "74675987f951e0876bca996ef509aa8f7088eed56d72a390393dc7d1f2e7188a",
+      "customers": 100,
+      "satellites": 20,
+      "truck_capacity": "2000",
+      "geometry": "rd",
+      "customer_layout_sha256": "08bdb39747dc47d71a9356ecd31ab6ea8238fa125a795cfe00a05094056cd894",
+      "full_layout_sha256": "7c8e7a4b96bcfa7696d0860d6b2ffd5ca65afff8e9d316d7b9841812a8a4f1de"
+    },
+    {
+      "file": "STTRP-200-10-1-c.json",
+      "name": "STTRP-200-10-1-c",
+      "sha256": "f2585e7b0bfcb9022ee226a7a0a6892cc602be331535ea20c529da697e8d58e3",
+      "customers": 200,
+      "satellites": 10,
+      "truck_capacity": "1000",
+      "geometry": "c",
+      "customer_layout_sha256": "8ce6a111944589adbeee2dfcbe70701e42d9231b190a67349665decc75d4e2f7",
+      "full_layout_sha256": "73f229c14a1c79fc65ef2d4254e6703ffc23966ac0a74e88a754fda170cb0c09"
+    },
+    {
+      "file": "STTRP-200-10-2-c.json",
+      "name": "STTRP-200-10-2-c",
+      "sha256": "d7bb6edb3b00aeb5b7dd2936262f58964e435858cb64e99bf58c82bd92ad28c5",
+      "customers": 200,
+      "satellites": 10,
+      "truck_capacity": "2000",
+      "geometry": "c",
+      "customer_layout_sha256": "8ce6a111944589adbeee2dfcbe70701e42d9231b190a67349665decc75d4e2f7",
+      "full_layout_sha256": "73f229c14a1c79fc65ef2d4254e6703ffc23966ac0a74e88a754fda170cb0c09"
+    },
+    {
+      "file": "STTRP-25-10-1-rd.json",
+      "name": "STTRP-25-10-1-rd",
+      "sha256": "194d7b8098c476f2d6114b741d476e05b6101fcf4128c83a81ed2b901bcfb2fb",
+      "customers": 25,
+      "satellites": 10,
+      "truck_capacity": "1000",
+      "geometry": "rd",
+      "customer_layout_sha256": "a494dd8c66e094539b6224aa6ac8427dd85b69363ed709cac7c7f4cc8337bc3a",
+      "full_layout_sha256": "6ad3b7966b3cf3b9fa1aadb2be709b21d883c346ec797f5afff0d8d45cb04f50"
+    },
+    {
+      "file": "STTRP-25-5-1-rd.json",
+      "name": "STTRP-25-5-1-rd",
+      "sha256": "c6a22edaf3c098d0b5f4223852f770ba6280b9d168ce8ab5a83ff417a223c34b",
+      "customers": 25,
+      "satellites": 5,
+      "truck_capacity": "1000",
+      "geometry": "rd",
+      "customer_layout_sha256": "a494dd8c66e094539b6224aa6ac8427dd85b69363ed709cac7c7f4cc8337bc3a",
+      "full_layout_sha256": "1326661398466cd21baf76c722e5028bca55888d91dc4e8594925416a3da1b33"
+    },
+    {
+      "file": "STTRP-25-5-2-rd.json",
+      "name": "STTRP-25-5-2-rd",
+      "sha256": "2d069c6c73896a1b6df84f7aa67bbfe3ca0bcfa7340be2f992789ef4b657b8e3",
+      "customers": 25,
+      "satellites": 5,
+      "truck_capacity": "2000",
+      "geometry": "rd",
+      "customer_layout_sha256": "a494dd8c66e094539b6224aa6ac8427dd85b69363ed709cac7c7f4cc8337bc3a",
+      "full_layout_sha256": "1326661398466cd21baf76c722e5028bca55888d91dc4e8594925416a3da1b33"
+    },
+    {
+      "file": "STTRP-50-10-1-c.json",
+      "name": "STTRP-50-10-1-c",
+      "sha256": "57f43fccda36696fcf93310f62b8ee9dea50815fb66b11db5cbf7590c28ac299",
+      "customers": 50,
+      "satellites": 10,
+      "truck_capacity": "1000",
+      "geometry": "c",
+      "customer_layout_sha256": "2bf9bce1f484f64d710b0cf6e9cb34d077ef8901c36ffec200db5f2274cf71d2",
+      "full_layout_sha256": "1e367090dfc68405f9b449b9a67a7783d405bbdfbc9d44ea4f90a6b4039a6290"
+    },
+    {
+      "file": "STTRP-50-10-2-c.json",
+      "name": "STTRP-50-10-2-c",
+      "sha256": "f86e4b95a3d16b364858fe9a9432c7b33d1297a999c51541ff1169ba5993f443",
+      "customers": 50,
+      "satellites": 10,
+      "truck_capacity": "2000",
+      "geometry": "c",
+      "customer_layout_sha256": "2bf9bce1f484f64d710b0cf6e9cb34d077ef8901c36ffec200db5f2274cf71d2",
+      "full_layout_sha256": "1e367090dfc68405f9b449b9a67a7783d405bbdfbc9d44ea4f90a6b4039a6290"
+    },
+    {
+      "file": "STTRP-50-5-2-c.json",
+      "name": "STTRP-50-5-2-c",
+      "sha256": "7c79abec5f5cbe13b6f2c1afe3d455f355ee6b442ca97106413e5a919073735a",
+      "customers": 50,
+      "satellites": 5,
+      "truck_capacity": "2000",
+      "geometry": "c",
+      "customer_layout_sha256": "9825e9f04f3e66941416de28910a68055fab1461158587e42fb26728b0eec53b",
+      "full_layout_sha256": "aaed713f14efb9f4a6771e6d676c941f3b0be293dcb72041576f22bc1f7a9341"
+    }
+  ]
+}

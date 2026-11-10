@@ -1,0 +1,81 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{bimer_course}[2026/11/10 BIMER report adaptation for course documents]
+\RequirePackage{imt_course}
+\RequirePackage{geometry}
+\geometry{a4paper,left=10.5mm,right=10.5mm,top=17.5mm,bottom=29mm,headheight=0pt,headsep=0pt,footskip=16mm}
+\RequirePackage{multicol}
+\RequirePackage{needspace}
+\RequirePackage{titlesec}
+\RequirePackage{fancyhdr}
+\RequirePackage{enumitem}
+% The reference pairs Helvetica with Archer. The full proprietary Archer
+% font is not available here: retain that serif/sans hierarchy with an
+% explicit Latin Modern Roman fallback, without using PDF font subsets.
+\newcommand{\BimerSerif}{\IMTDisplay}
+\setlength\parindent{0pt}
+\setlength\parskip{5pt}
+\setlength\columnsep{4.233mm}
+\setlength\multicolsep{5pt}
+\setlength\emergencystretch{1.2em}
+\clubpenalty=10000\widowpenalty=10000
+\raggedbottom
+\setlist{nosep,leftmargin=*}
+\setlist[itemize]{itemsep=4pt,label=\raisebox{.2ex}{\tiny$\blacktriangleright$}}
+\setlist[enumerate]{itemsep=4pt}
+\renewcommand\arraystretch{1.12}
+\titleformat{\section}{\fontsize{12}{14.4}\selectfont\BimerSerif\bfseries\color{IMTCyan}}{\thesection}{.65em}{\MakeUppercase}
+\titleformat{\subsection}{\fontsize{11.5}{14}\selectfont\BimerSerif\bfseries\color{black}}{\thesubsection}{.65em}{}
+\titlespacing*{\section}{0pt}{12pt}{6pt}
+\titlespacing*{\subsection}{0pt}{9pt}{5pt}
+\newenvironment{BimerColumns}{\begin{multicols}{2}\raggedcolumns}{\end{multicols}}
+\newcommand{\BimerLead}[1]{{\BimerSerif\bfseries\small\color{IMTPink}#1\par}}
+\newcommand{\BimerOpener}[2]{%
+  {\fontsize{28}{33}\selectfont\bfseries\color{black}\MakeUppercase{#1}\par}
+  \vspace{4mm}
+  {\fontsize{27}{32}\selectfont\BimerSerif\color{black}#2\par}
+  \vspace{3mm}
+}
+\newcommand{\BimerReferenceOpener}[2]{%
+  {\fontsize{22}{26}\selectfont\bfseries\color{black}\MakeUppercase{#1}\par}
+  \vspace{2mm}
+  {\fontsize{22}{26}\selectfont\BimerSerif\color{black}#2\par}\vspace{2mm}
+}
+% The BIMER report uses unadorned even pages and two right-edge triangles
+% on odd pages. The interior triangles are coordinated smaller versions
+% (27/38 mm) so ordinary TeX flow, equations, and code cannot enter them.
+\newif\ifBimerCover
+\BimerCoverfalse
+\pagestyle{empty}
+\AddToHook{shipout/background}{%
+  \ifBimerCover\else
+    \begin{tikzpicture}[remember picture,overlay]
+      \ifodd\value{page}
+        \fill[IMTCyan] ([xshift=-27mm]current page.north east)--(current page.north east)--([yshift=-27mm]current page.north east)--cycle;
+        \fill[IMTPink] ([yshift=38mm]current page.south east)--(current page.south east)--([xshift=-38mm]current page.south east)--cycle;
+        \node[anchor=base,inner sep=0pt,text=white,font=\fontsize{16}{18}\selectfont] at ([xshift=-5.25mm,yshift=4.767mm]current page.south east) {\thepage};
+      \else
+        \node[anchor=base,inner sep=0pt,text=black,font=\fontsize{16}{18}\selectfont] at ([xshift=5.25mm,yshift=4.767mm]current page.south west) {\thepage};
+      \fi
+    \end{tikzpicture}%
+  \fi
+}
+% Exact cover polygon coordinates measured from the supplied BIMER PDF.
+% Its original company title and partner mark are deliberately not reused.
+\newcommand{\BimerCoverPage}[4]{%
+  \BimerCovertrue\thispagestyle{empty}
+  \begin{tikzpicture}[remember picture,overlay]
+    \begin{scope}[shift={(current page.north west)},x=1mm,y=-1mm]
+      \fill[IMTCyan] (0,0) rectangle (210,297);
+      \fill[IMTNavy] (0,0)--(63,0)--(0,63.643)--cycle;
+      \fill[IMTPink] (84,0)--(210,0)--(210,127.286)--cycle;
+      \fill[white] (0,127.286)--(0,297)--(168,297)--cycle;
+      \node[anchor=base west,inner sep=0pt,text=white,font=\fontsize{30}{36}\selectfont\bfseries] at (21,92.795) {#1};
+      \node[anchor=north west,inner sep=0pt,text=white,text width=168mm,align=left,font=\fontsize{28}{34}\selectfont\BimerSerif] at (21,102.5) {#2};
+      \node[anchor=north west,inner sep=0pt,text=white,text width=151mm,align=left,font=\fontsize{12}{15}\selectfont] at (42,158) {#3};
+      \node[anchor=north west,inner sep=0pt,text=white,text width=100mm,align=left,font=\fontsize{11}{14}\selectfont] at (98,199) {#4};
+      \node[anchor=north west,inner sep=0pt] at (14,242) {\IMTBlock[94.5mm]};
+    \end{scope}
+  \end{tikzpicture}%
+  \null\clearpage\BimerCoverfalse
+}
+\endinput

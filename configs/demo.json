@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "title": "Session 1 greedy construction demonstration",
+  "instance_glob": "../instances/public/*.json",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "time_limit": 30,
+  "baseline_name": "Demo nearest",
+  "notes": "Demonstration on the ten public instances with the fixed 30-second budget. The greedy nearest-neighbour constructor and the simple randomized constructor illustrate the report before teams develop local search in Session 2 and more advanced metaheuristics in Session 3. Both participate in this illustrative ranking; these are not student submissions or course marks.",
+  "solvers": [
+    {
+      "name": "Demo nearest",
+      "cwd": "..",
+      "command": [
+        "{python}",
+        "-m",
+        "sttrpsd",
+        "baseline",
+        "--instance",
+        "{instance}",
+        "--solution",
+        "{solution}",
+        "--seed",
+        "{seed}",
+        "--time-limit",
+        "{time_limit}",
+        "--method",
+        "nearest"
+      ],
+      "include_in_ranking": true
+    },
+    {
+      "name": "Demo random",
+      "cwd": "..",
+      "command": [
+        "{python}",
+        "-m",
+        "sttrpsd",
+        "baseline",
+        "--instance",
+        "{instance}",
+        "--solution",
+        "{solution}",
+        "--seed",
+        "{seed}",
+        "--time-limit",
+        "{time_limit}",
+        "--method",
+        "random"
+      ],
+      "include_in_ranking": true
+    }
+  ]
+}

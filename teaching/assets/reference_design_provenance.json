@@ -1,0 +1,34 @@
+{
+  "document_model": {
+    "filename": "template_imt_mines_ales_bimer.pdf",
+    "sha256": "cf9ed8444bf5b7aea2f180b4e2c0dbb6b68dbeb242e009ca64b089f435dde474",
+    "use": "Written-document covers, serif/sans hierarchy, headings and corners; student statement single column, instructor guide two columns."
+  },
+  "dashboard_model": {
+    "filename": "UFC_SyCoIA_EuroMov_Interactive_Research_Map.html",
+    "sha256": "2b28c3739204622f2021fb475fa7764e3fa97aefacedbb4bccf149973410a3cf",
+    "use": "Typography, institutional header, navigation, cards, filter controls and table styling."
+  },
+  "palette": "October 2024 IMT Mines Ales digital HEX specifications",
+  "font_substitutes": {
+    "Helvetica": "Nimbus Sans",
+    "Archer Light": "Latin Modern Roman"
+  },
+  "original_reference_contents_distributed": false,
+  "slide_model": {
+    "filename": "Graphical_Models_and_Bayesian_Networks_Lecture (1).zip",
+    "sha256": "1cb7f258a9cda013acc5b8c0b16cf0ccbc0ef75a37270587e9cd30d7498b810b",
+    "use": "Exact supplied imt_pres class, themes, logos, title page, headings, footers, native numbering, fonts, blocks and table style.",
+    "template_file_sha256": {
+      "beamercolorthemeimt.sty": "49ec2654a53a381d17d84d892fc03e1043e6c402cb19ff0bd52cc216973751e2",
+      "beamerfontthemeimt.sty": "7e672327aedb86e5093f079e1759a3228da5653c5d5a79eebb52427f8e276a29",
+      "beamerthemeimt.sty": "1ac0583c03cdb6dce64bb0a8280921b55858adad4eb6f1b0c849c9aacf915e4b",
+      "imt_pres.cls": "faef480751177abe8639c5740a1bdc0f06a00ddb732a0270c8d96dd2d1e1aa3c",
+      "logos/Logo2IA.png": "29d4e964cbba18ecd4f720f560630cf3b2948de9f54de0ef2ffed28b3b051156",
+      "logos/logo.pdf": "b3458c52c5e8685121d4491c3b647cd2d8c3d4e4c0221e241269368e51a0117c",
+      "logos/logo2ia.pdf": "e9e2473f5d07b08b27cb102f295011100ffcc39c926adce1643f7d0baa45cba1",
+      "logos/logo_imt_ales.png": "189c759797e566bed0f682bd212b781d5da798db59ec1ca299d0616971549bfe",
+      "logos/logo_imt_ales_rf.png": "7527eb4ef43d01095601e9a2590b79804273c8fb189467dc1719598a18d8a915"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+\ProvidesPackage{beamerfontthemeimt}
+
+% NEWPX FONT (Latex)
+
+\if@donewPxFont%
+% Load newPx Font %
+% \usefonttheme{professionalfonts}
+% \usefonttheme{serif}
+\RequirePackage[T1]{fontenc}
+\RequirePackage[full]{textcomp}
+% \RequirePackage[osf]{newpxtext} % osf for text, not math
+\RequirePackage{helvet} % sans serif
+%\RequirePackage[varqu,varl]{inconsolata} % sans serif mono font
+%\RequirePackage[bigdelims,vvarbb]{newpxmath} % bb from STIX
+\RequirePackage{euler}
+\usepackage{exscale}
+
+%\RequirePackage[cal=boondoxo]{mathalfa} % This package provides a standard means of setting math alphabets associated with the macros \mathcal, \mathbb, \mathfrak
+\fi%
+
+\linespread{0.9}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FONT ASSIGMENTS
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+% Title Page
+\setbeamerfont{title}{family=\sffamily, size={\fontsize{22}{24}}, shape=\bfseries}
+\setbeamerfont{subtitle}{size={\fontsize{12}{24}}, shape=\mdseries}
+\setbeamerfont{date}{size=\tiny, family=\sffamily}
+\setbeamerfont{author}{size=\tiny, family=\sffamily}
+\setbeamerfont{institute}{size=\tiny, family=\sffamily}
+
+% Section
+\setbeamerfont{section page}{size=\Huge, shape=\bfseries, family=\sffamily}
+\setbeamerfont{section in head/foot}{family=\sffamily, size={\fontsize{9}{8}}}
+\setbeamerfont{section in toc}{size=\large, shape=\bfseries}
+\setbeamerfont{subsection in toc}{size=\footnotesize, shape=\bfseries}
+
+% Content
+\setbeamerfont{normal text}{family=\sffamily, size={\fontsize{11}{13}}}
+\setbeamerfont{item}{family=\sffamily, size={\fontsize{11}{13}}}
+\setbeamerfont{frametitle}{family=\sffamily, size={\fontsize{10}{10}}}
+
+
+\setbeamerfont{copyright text}{size=\tiny}
+\setbeamerfont{block title}{series=\sffamily, size=\large}
+\setbeamerfont{block title alerted}{family=\sffamily, size=\large}
+\setbeamerfont{block title example}{family=\sffamily, size=\large}
+
+\setbeamerfont{caption}{size=\small}
+\setbeamerfont{caption name}{family=\small}
+
+\setbeamerfont{page number in head/foot}{size=\tiny, family=\sffamily}
+

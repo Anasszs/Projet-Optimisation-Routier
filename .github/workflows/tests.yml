@@ -1,0 +1,78 @@
+name: Cross-platform tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        python-version: ["3.10", "3.13"]
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run the regression suite
+        run: python -m unittest discover -s tests -v
+
+      - name: Construct and score a solution in paths containing spaces
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          import shutil
+          import subprocess
+          import sys
+          import tempfile
+
+          source = Path.cwd()
+          with tempfile.TemporaryDirectory(prefix="sttrpsd paths with spaces ") as directory:
+              project = Path(directory) / "course project"
+              shutil.copytree(source / "sttrpsd", project / "sttrpsd", ignore=shutil.ignore_patterns("__pycache__"))
+              instance = project / "input data" / "toy instance.json"
+              instance.parent.mkdir()
+              shutil.copyfile(source / "examples" / "toy.json", instance)
+              solution = project / "run output" / "toy solution.json"
+              score_file = project / "run output" / "toy score.json"
+
+              baseline = subprocess.run(
+                  [sys.executable, "-m", "sttrpsd", "baseline",
+                   "--instance", str(instance), "--solution", str(solution),
+                   "--method", "nearest", "--seed", "0", "--time-limit", "30"],
+                  cwd=project, check=True, capture_output=True, text=True, encoding="utf-8",
+              )
+              assert solution.is_file(), "The baseline did not create the requested solution"
+              constructed = json.loads(baseline.stdout)
+              assert constructed["feasible"] is True
+              assert Path(constructed["solution"]).resolve() == solution.resolve()
+
+              scored = subprocess.run(
+                  [sys.executable, "-m", "sttrpsd", "score",
+                   "--instance", str(instance), "--solution", str(solution),
+                   "--output", str(score_file)],
+                  cwd=project, check=True, capture_output=True, text=True, encoding="utf-8",
+              )
+              result = json.loads(scored.stdout)
+              assert result["feasible"] is True, result
+              assert result["errors"] == [], result
+              assert result["cost"] == constructed["cost"], (result, constructed)
+              assert json.loads(score_file.read_text(encoding="utf-8")) == result
+              print(f"Baseline and score agree: cost={result['cost']}")

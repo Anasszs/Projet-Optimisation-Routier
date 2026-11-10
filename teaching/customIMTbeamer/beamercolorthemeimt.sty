@@ -1,0 +1,171 @@
+\ProvidesPackage{beamercolorthemeimt}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	OPTIONS
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+\newif\if@beamer@imt@cblock \@beamer@imt@cblockfalse \DeclareOptionBeamer{cblock}{\@beamer@imt@cblocktrue}
+
+\newif\if@beamer@imt@minimal \@beamer@imt@minimalfalse \DeclareOptionBeamer{minimal}{\@beamer@imt@minimaltrue}
+
+\newif\if@beamer@imt@greybg \@beamer@imt@greybgfalse \DeclareOptionBeamer{greybg}{\@beamer@imt@greybgtrue}
+
+\ProcessOptionsBeamer
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	IMT COLOR THEME
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%== BLUE
+
+\definecolor{imtLightBlue}{RGB}{194,245,255} 
+\newcommand{\cimtLightBlue}[1]{{\color{imtLightBlue}{#1}}}
+
+\definecolor{imtBlue}{RGB}{0,184,222}
+\newcommand{\cimtBlue}[1]{{\color{imtBlue}{#1}}} 
+
+\definecolor{imtDarkBlue}{RGB}{20,35,60}
+\newcommand{\cimtDarkBlue}[1]{{\color{imtDarkBlue}{#1}}}
+
+%== BLACK
+
+\definecolor{imtBlack}{RGB}{0,0,0} 
+\newcommand{\cimtBlack}[1]{{\color{imtBlack}{#1}}}
+
+%== GREY
+
+\definecolor{imtLightGrey}{RGB}{237 243 244} 
+\newcommand{\cimtLightGrey}[1]{{\color{imtLightGrey}{#1}}}
+
+\definecolor{imtGrey}{RGB}{237,243,244} 
+\newcommand{\cimtGrey}[1]{{\color{imtGrey}{#1}}}
+
+\definecolor{imtDarkGrey}{RGB}{60,60,60} 
+\newcommand{\cimtDarkGrey}[1]{{\color{imtDarkGrey}{#1}}}
+
+%== RED
+
+% \definecolor{imtLightRed}{RGB}{242,73,96} 
+% \newcommand{\cimtLightRed}[1]{{\color{imtLightRed}{#1}}}
+
+\definecolor{imtRed}{RGB}{242,73,96} 
+\newcommand{\cimtRed}[1]{{\color{imtRed}{#1}}}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	GLOBAL COLOR THEME
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%== BLUE
+
+\newcommand{\cLightBlue}[1]{{\color{imtLightBlue}{#1}}} 
+\newcommand{\crLightBlue}{\color{imtLightBlue}} 
+\newcommand{\cnLightBlue}{imtLightBlue} 
+\newcommand{\cBlue}[1]{{\color{imtBlue}{#1}}} 
+\newcommand{\crBlue}{\color{imtBlue}} 
+\newcommand{\cnBlue}{imtBlue}
+\newcommand{\cDarkBlue}[1]{{\color{imtDarkBlue}{#1}}} 
+\newcommand{\crDarkBlue}{\color{imtDarkBlue}} 
+\newcommand{\cnDarkBlue}{imtDarkBlue}
+
+%== GREY
+
+\newcommand{\cLightGrey}[1]{{\color{imtLightGrey}{#1}}} 
+\newcommand{\crLightGrey}{\color{imtLightGrey}} 
+\newcommand{\cnLightGrey}{imtLightGrey} 
+\newcommand{\cGrey}[1]{{\color{imtGrey}{#1}}} 
+\newcommand{\crGrey}{\color{imtGrey}} 
+\newcommand{\cnGrey}{imtGrey} 
+\newcommand{\cDarkGrey}[1]{{\color{imtDarkGrey}{#1}}} 
+\newcommand{\crDarkGrey}{\color{imtDarkGrey}} 
+\newcommand{\cnDarkGrey}{imtDarkGrey}
+
+%== BLACK
+
+\newcommand{\cBlack}[1]{{\color{imtBlack}{#1}}}
+\newcommand{\crBlack}{\color{imtBlack}}
+\newcommand{\cnBlack}{imtBlack}
+
+%== RED
+
+\newcommand{\cLightRed}[1]{{\color{imtLightRed}{#1}}} 
+\newcommand{\crLightRed}{\color{imtLightRed}} 
+\newcommand{\cnLightRed}{imtLightRed} 
+\newcommand{\cRed}[1]{{\color{imtRed}{#1}}} 
+\newcommand{\crRed}{\color{imtRed}} 
+\newcommand{\cnRed}{imtRed} 
+\newcommand{\cDarkRed}[1]{{\color{imtDarkRed}{#1}}} 
+\newcommand{\crDarkRed}{\color{imtDarkRed}} 
+\newcommand{\cnDarkRed}{imtDarkRed}
+
+% General
+\setbeamercolor{normal text}{fg=imtBlack}
+\setbeamercolor{structure}{fg=imtDarkGrey} 
+\setbeamercolor{alerted text}{fg=imtRed} 
+\setbeamercolor{example text}{fg=imtBlue} 
+\setbeamercolor{copyright text}{fg=imtDarkBlue}
+
+% Palettes
+\setbeamercolor{palette primary}{fg=white, bg=imtDarkBlue} 
+\setbeamercolor{palette secondary}{fg=imtDarkGrey,bg=imtGrey} 
+\setbeamercolor{palette tertiary}{fg=imtLightBlue, bg=imtDarkGrey} 
+\setbeamercolor{palette quaternary}{fg=imtGrey, bg=imtBlue} 
+
+\setbeamercolor{mini frame}{fg=imtRed, bg=imtGrey}%{bg=imtGrey}
+\setbeamercolor{section in head/foot}{fg=imtRed, bg=imtGrey}%parent=palette secondary
+\setbeamercolor{author}{fg=imtRed, bg=imtGrey}%parent=palette secondary
+\setbeamercolor{date}{fg=imtRed, bg=imtGrey}%parent=palette secondary
+\setbeamercolor{section in toc}{fg=imtRed, bg=imtGrey}
+\setbeamercolor{subsection in toc}{fg=imtDarkBlue, bg=imtGrey}
+
+% Titlepage
+\setbeamercolor{title}{parent=normal text}
+\setbeamercolor{subtitle}{parent=normal text} 
+\setbeamercolor{institute}{parent=normal text}
+\setbeamercolor{author}{fg=imtDarkBlue}
+\setbeamercolor{date}{fg=imtDarkBlue}
+\setbeamercolor{title page}{fg=imtDarkBlue, bg=imtBlue}
+
+% Content
+\setbeamercolor{frametitle}{parent=palette secondary}
+
+% Blocks
+\setbeamercolor{block title}{fg=white,bg=imtBlue} 
+\setbeamercolor{block body}{fg=imtBlack, bg=imtLightGrey} 
+\setbeamercolor{block title example}{fg=white, bg=imtDarkBlue} 
+\setbeamercolor{block body example}{fg=imtBlack, bg=imtLightGrey} 
+\setbeamercolor{block title alerted}{fg=white, bg=imtRed} 
+\setbeamercolor{block body alerted}{fg=imtBlack, bg=imtLightGrey}
+
+% Notes
+\setbeamercolor{note page}{fg=imtDarkGrey,bg=imtGrey} \setbeamercolor{note title}{fg=white, bg=imtDarkGrey} \setbeamercolor{note date}{parent=note title}
+
+% Page Number
+\setbeamercolor{page number in head/foot}{fg=imtDarkGrey} 
+\setbeamercolor{qed}{fg=imtDarkBlue} 
+\setbeamercolor{itemize item}{fg=imtBlue} 
+\setbeamercolor{itemize subitem}{fg=imtRed} 
+\setbeamercolor{itemize subsubitem}{fg=imtDarkGrey}
+
+\if@beamer@imt@minimal
+\setbeamercolor{palette primary}{fg=imtBlue, bg=white} 
+\setbeamercolor{palette secondary}{fg=imtDarkGrey,bg=imtGrey} \fi
+
+\if@beamer@imt@greybg
+
+% General
+\setbeamercolor{normal text}{fg=imtDarkGrey,bg=imtGrey} 
+\setbeamercolor{block body}{fg=imtDarkGrey, bg=imtLightBlue} \fi
+
+\if@beamer@imt@cblock
+
+\setbeamercolor{block title}{fg=white,bg=imtBlue} 
+\setbeamercolor{block body}{fg=imtDarkGrey, bg=imtLightBlue} 
+\setbeamercolor{block title example}{fg=white, bg=§} 
+\setbeamercolor{block body example}{fg=imtDarkGrey, bg=imtLightBlue} 
+\setbeamercolor{block title alerted}{fg=white, bg=imtRed} 
+\setbeamercolor{block body alerted}{fg=imtDarkGrey, bg=imtLightRed}
+
+\setbeamercolor{qed}{fg=imtDarkGrey} 
+\setbeamercolor{itemize item}{fg=imtBlue} 
+\setbeamercolor{itemize subitem}{fg=imtRed} 
+\setbeamercolor{itemize subsubitem}{fg=imtDarkBlue} 
+\fi
+
+\mode<all> 

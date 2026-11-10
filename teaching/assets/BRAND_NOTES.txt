@@ -1,0 +1,130 @@
+IMT MINES ALES BRAND ASSETS AND IMPLEMENTATION NOTES
+=================================================
+
+Source: the user-supplied Charte graphique IMT Mines Ales, October 2024,
+file imt_charte_imtales_oct(2).pdf. Page references below are the printed
+page numbers in the charter, not PDF spread indices.
+
+OFFICIAL ARTWORK
+
+imt_mines_ales_block.{pdf,svg,png}: the official horizontal school logo
+and French state brand (Marianne), clipped from the charter's first cover.
+imt_mines_ales_logo.{pdf,svg,png}: the official school logo from the same
+cover, without the separate Marianne block, for interior pages.
+
+The original vector paths, proportions and colours are preserved. No logo
+element was redrawn. Each asset includes a white background and H/2 clear
+space on every outer side, H being the original tangram height (p.7).
+The PDF and SVG are vector assets; the PNG is a faithful raster rendering.
+See brand_asset_provenance.json for the source checksum, clipping bounds
+and exact dimensions.
+
+Full block: 248.630 x 105.472 pt; PNG 1800 x 764 pixels.
+Standalone: 168.367 x 105.472 pt; PNG 1400 x 878 pixels.
+
+The minimum 20 mm school-logo width specified on p.7 refers to the actual
+logo, not the surrounding white canvas. Including this asset's padding:
+  * full block: use at least 38.0 mm outer width; 52 mm is recommended;
+  * standalone: use at least 25.72 mm outer width; 30 mm is recommended.
+Scale proportionally. Do not crop the built-in clear space or independently
+reposition or recolour pieces of the official artwork.
+
+PLACEMENT
+
+Use the full block on the first cover/opening, on white, preferably at the
+upper left (pp.8-9, 24-25). The school-only mark may be used inside (p.24).
+The charter defines a protected white region for the cover block using
+seven grid squares horizontally and four vertically (pp.18-19), with
+flexibility for landscape and special formats. The left placement and
+protection zone should remain visible even on a restrained academic cover.
+
+There is a separate website exception: the state brand precedes the school
+mark at the left of a permanent website header (p.24). The supplied block
+is the charter's document/report configuration, with Marianne on the right;
+it is appropriate for the self-contained downloadable course report.
+
+DIGITAL PALETTE
+
+                 Printed HEX   Printed RGB       Other printed reference
+IMT cyan         #00B8DE        0,184,222         Pantone 2199C
+School pink      #F14862        242,73,98         Pantone 198C
+Navy             #14223C        20,35,60          Pantone 533C
+Light grey       #EDF3F4        237,243,244
+White            #FFFFFF       255,255,255
+
+Source: p.14. The printed HEX and RGB specifications disagree slightly for
+pink and navy: #F14862 equals RGB 241,72,98; #14223C equals RGB 20,34,60.
+For consistent digital/LaTeX styling, the printed HEX values are selected.
+The official logo artwork itself is retained without recolouring.
+Black is used for readable body text and in the original logo (p.6).
+Chart colours are the four non-white palette colours, with 100% and 50%
+tints as illustrated on p.41. Do not invent a multicolour chart palette.
+
+TYPOGRAPHY
+
+Helvetica is the primary typeface; Archer is an optional companion only in
+Light or Bold. Arial is the office fallback when the other fonts cannot be
+used (pp.12-13). Titles use bold sans serif, aligned left or right; body text
+is regular/light, left-aligned or justified (p.15). The report/PowerPoint
+office examples are on pp.49-50.
+
+This build environment has Nimbus Sans and Liberation Sans, but no complete
+genuine Helvetica or Arial installation. Embedded fonts in the supplied PDF
+are incomplete subsets: their character maps list more glyphs than have
+actual outlines. They must not be used for arbitrary document text.
+LaTeX may use Nimbus Sans through helvet as a metric-compatible Helvetica
+surrogate. Do not describe the compiled result as using genuine Helvetica.
+For HTML, prefer: Helvetica, Arial, "Nimbus Sans", "Liberation Sans",
+sans-serif. Retain mathematical fonts where needed for legible formulae.
+
+RESTRAINED ACADEMIC APPLICATION
+
+Keep the main reading area white, body text dark, headings bold sans serif,
+and use cyan for the primary identity cue with pink as a supporting accent.
+Use a small number of 45-degree or 90-degree triangles on a cover (pp.20-21),
+preserving the protected white logo area. In the interior, the charter asks
+for a cyan triangle at least once per double page, paired with school pink
+(p.40). A consistent cyan corner and a restrained pink accent can carry the
+identity without obstructing equations, tables, or diagrams. The PowerPoint
+example uses white pages, corner triangles, an interior footer rule, a small
+school mark and page numbering (p.49).
+
+The cover grid uses a margin equal to one tenth of the short page dimension.
+The interior grid may reduce this to one twentieth; the selected interior
+grid must remain consistent across pages (pp.16-17).
+
+REFERENCE IMPLEMENTATIONS USED FOR THIS REVISION
+
+The BIMER company-report model (template_imt_mines_ales_bimer.pdf) supplies
+the document composition: a full cyan diagonal cover with navy/pink upper
+triangles and a white logo field at the lower left; bold sans-serif titles
+paired with a serif display face; cyan subheads; and alternating
+plain/triangular folios. At the instructor's request, the student statement
+uses one reading column throughout with 19-mm side margins. The instructor
+guide retains the model's two-column prose. Mathematical expressions, code
+and tables keep enough width to remain readable. The measured reference
+geometry and original font information are in bimer_reference/.
+
+The model's embedded Archer and Helvetica fonts are incomplete subsets and
+are not reused for new text. Compiled article PDFs use Nimbus Sans and Latin
+Modern Roman for the sans/serif contrast. With XeLaTeX or LuaLaTeX the shared
+IMTDisplay command uses Archer Light when installed. This is an explicit
+font substitution, not a claim to reproduce the proprietary typefaces.
+
+SLIDE TEMPLATE
+
+The slides now use the attached Graphical Models and Bayesian Networks
+lecture template directly. All files in customIMTbeamer/ are preserved
+byte-for-byte from that attachment. Its imt_pres class supplies the title
+page, headline, footer, native page numbering, colours, font settings,
+blocks and table style. No custom replacements of those templates are
+defined in slides.tex. Graph-specific TikZ notation is used only to draw
+the routing example. The template's Euler/EulerVM math font dependencies
+are retained. The BIMER cover is used for the written documents only.
+
+The BRAFITEC visual model is the latest
+UFC_SyCoIA_EuroMov_Interactive_Research_Map.html. The STTRPSD report adopts its
+institutional header, wide grid, large title, cyan/pink geometric accents,
+navy-selected tabs, pale filter panels, bordered cards and dark table heads.
+Only the visual structure is reused; research-map data and the source
+company-report content are not distributed in the course package.

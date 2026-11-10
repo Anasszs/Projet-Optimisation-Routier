@@ -1,0 +1,316 @@
+{
+  "source": {
+    "filename": "template_imt_mines_ales_bimer.pdf",
+    "sha256": "cf9ed8444bf5b7aea2f180b4e2c0dbb6b68dbeb242e009ca64b089f435dde474",
+    "pages": 5,
+    "application": "Measured BIMER report geometry; original PDF unchanged"
+  },
+  "coordinate_system": {
+    "origin": "top-left",
+    "x": "right",
+    "y": "down",
+    "page_mm": [
+      210,
+      297
+    ],
+    "page_pt": [
+      595.276,
+      841.89
+    ]
+  },
+  "cover": {
+    "background": "IMT cyan",
+    "polygons_normalized": {
+      "navy_top_left": [
+        [
+          0,
+          0
+        ],
+        [
+          0.3,
+          0
+        ],
+        [
+          0,
+          0.21428571428571427
+        ]
+      ],
+      "pink_top_right": [
+        [
+          0.4,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0.42857142857142855
+        ]
+      ],
+      "white_bottom_left": [
+        [
+          0,
+          0.42857142857142855
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0.8,
+          1
+        ]
+      ]
+    },
+    "polygons_mm": {
+      "navy_top_left": [
+        [
+          0,
+          0
+        ],
+        [
+          63,
+          0
+        ],
+        [
+          0,
+          63.643
+        ]
+      ],
+      "pink_top_right": [
+        [
+          84,
+          0
+        ],
+        [
+          210,
+          0
+        ],
+        [
+          210,
+          127.286
+        ]
+      ],
+      "white_bottom_left": [
+        [
+          0,
+          127.286
+        ],
+        [
+          0,
+          297
+        ],
+        [
+          168,
+          297
+        ]
+      ]
+    },
+    "main_title": {
+      "font": "Helvetica Bold",
+      "size_pt": 30,
+      "colour": "white",
+      "baseline_mm": [
+        21,
+        92.795
+      ],
+      "case": "uppercase"
+    },
+    "subtitle": {
+      "font": "Archer Light",
+      "size_pt": 30,
+      "leading_pt": 36,
+      "colour": "white",
+      "baseline_x_mm": 21,
+      "baseline_y_mm": [
+        109.495,
+        122.195,
+        134.895
+      ],
+      "case": "uppercase"
+    },
+    "school_logo_ink_bounds_mm": [
+      21,
+      249.01,
+      70.723,
+      274.78
+    ],
+    "state_brand_ink_bounds_mm": [
+      84.457,
+      248.961,
+      96.841,
+      259.733
+    ],
+    "secondary_logo_bounds_mm": [
+      168,
+      254.571,
+      189.214,
+      275.786
+    ],
+    "secondary_logo_note": "Secondary mark unique to the reference; not included in reusable assets",
+    "official_logo_note": "Use original official mark assets unchanged. The supplied charter block outer width about94.5mm gives the source school-logo scale. Canvas padding must be included in positioning.",
+    "geometry_note": "Source uses a10-by14 grid, with diagonals very close to45degrees. A tiny source Bezier deviation in the cyan edge is not intentional design geometry."
+  },
+  "interior": {
+    "pages_measured": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "margins_mm": {
+      "left": 10.5,
+      "right": 10.5,
+      "top": 10.5,
+      "bottom": 10.5
+    },
+    "columns": 2,
+    "column_width_mm": 92.3833,
+    "gutter_mm": 4.2333,
+    "column_left_edges_mm": [
+      10.5,
+      107.1167
+    ],
+    "column_right_edges_mm": [
+      102.8833,
+      199.5
+    ],
+    "body": {
+      "font": "Helvetica",
+      "size_pt": 12,
+      "leading_pt": 14.4,
+      "colour": "black",
+      "alignment": "justified",
+      "paragraph_indent": 0,
+      "paragraph_gap_pt": 8.504
+    },
+    "section_heading": {
+      "font": "Archer Bold",
+      "size_pt": 11,
+      "leading_pt": 13.2,
+      "colour": "cyan",
+      "case": "uppercase"
+    },
+    "minor_heading": {
+      "font": "Archer Bold",
+      "size_pt": 10,
+      "colour": "black"
+    },
+    "introductory_callout": {
+      "font": "Archer Semibold",
+      "size_pt": 10,
+      "leading_pt": 12,
+      "colour": "pink",
+      "features": "small capitals",
+      "alignment": "right/justified as source"
+    },
+    "emphasis": {
+      "font": "Helvetica Oblique",
+      "size_pt": 12,
+      "colour": "pink"
+    },
+    "references": {
+      "font": "Helvetica",
+      "size_pt": 9,
+      "leading_pt": 10.8,
+      "colour": "black"
+    },
+    "opening_page_title": {
+      "font": "Helvetica Bold",
+      "size_pt": 30,
+      "baseline_mm": [
+        10.5,
+        18.545
+      ],
+      "colour": "black"
+    },
+    "opening_page_subtitle": {
+      "font": "Archer Light",
+      "size_pt": 30,
+      "leading_pt": 36,
+      "baseline_x_mm": 10.5,
+      "baseline_y_mm": [
+        35.245,
+        47.945,
+        60.645
+      ],
+      "colour": "black"
+    },
+    "opening_page_columns_start_y_mm": 67.8,
+    "odd_page_polygons_mm": {
+      "cyan_top_right": [
+        [
+          168,
+          0
+        ],
+        [
+          210,
+          0
+        ],
+        [
+          210,
+          42.429
+        ]
+      ],
+      "pink_bottom_right": [
+        [
+          210,
+          240.5
+        ],
+        [
+          210,
+          297
+        ],
+        [
+          154,
+          297
+        ]
+      ]
+    },
+    "even_page_polygons": [],
+    "running_header": null,
+    "footer_rule": null,
+    "interior_logo": null,
+    "folio": {
+      "font": "Helvetica",
+      "size_pt": 16,
+      "baseline_y_mm": 292.233,
+      "even_center_x_mm": 5.25,
+      "odd_center_x_mm": 204.75,
+      "even_colour": "black",
+      "odd_colour": "white"
+    },
+    "text_exclusion_note": "Odd-page right-column text must avoid both triangle regions. Source p3 starts the right column about31.75mm from top and ends about243mm down the page. Reserve this space or proportionally reduce the triangles for content-heavy course pages."
+  },
+  "palette": {
+    "canonical_charter_hex": {
+      "cyan": "#00B8DE",
+      "pink": "#F14862",
+      "navy": "#14223C",
+      "grey": "#EDF3F4",
+      "white": "#FFFFFF"
+    },
+    "bimer_pdf_rgb_appearance_from_fitz": {
+      "cyan": "#00B4D5",
+      "pink": "#E72557",
+      "navy": "#162640"
+    },
+    "note": "The BIMER PDF contains colour-managed print colours; its converted RGB appearance differs from the charter digital HEX values. Geometry and typographic hierarchy can follow BIMER while using the charter digital palette."
+  },
+  "font_audit": {
+    "all_embedded_fonts_are_subsets": true,
+    "Archer_Light_glyphs": 22,
+    "Archer_Semibold_glyphs": 39,
+    "Archer_Bold_glyphs": 50,
+    "Helvetica_Bold_populated_outlines": 17,
+    "Helvetica_CID_has_unicode_cmap": false,
+    "usable_complete_embedded_fonts": [],
+    "installed_fallbacks": {
+      "sans": "Nimbus Sans, metric-compatible Helvetica surrogate",
+      "serif": "Bitstream Charter or Latin Modern Roman; neither is Archer nor metric-compatible with Archer"
+    },
+    "instruction": "Do not use these incomplete embedded subsets for editable course text; keep fallback naming honest."
+  }
+}

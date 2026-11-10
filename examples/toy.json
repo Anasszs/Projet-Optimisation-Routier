@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "name": "toy",
+  "depot": {"id": 0, "x": 0, "y": 0},
+  "satellites": [
+    {"id": 1, "x": 2, "y": 0},
+    {"id": 2, "x": 8, "y": 0}
+  ],
+  "customers": [
+    {"id": 3, "x": 2, "y": 3, "demand": 6},
+    {"id": 4, "x": 4, "y": 3, "demand": 4},
+    {"id": 5, "x": 8, "y": 4, "demand": 8},
+    {"id": 6, "x": 10, "y": 4, "demand": 7}
+  ],
+  "truck_capacity": 10,
+  "trailer_capacity": 15,
+  "distance": {"type": "euclidean"},
+  "metadata": {"provenance": "Pedagogical worked example; not an original benchmark instance"}
+}

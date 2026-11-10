@@ -1,0 +1,221 @@
+% Compile from teaching/ with the supplied customIMTbeamer directory.
+% The user's attached class, themes and logos are retained unchanged.
+\documentclass[table]{customIMTbeamer/imt_pres}
+\usepackage{amsmath,amssymb,booktabs,listings}
+\usetikzlibrary{arrows.meta,positioning}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,columns=fullflexible,showstringspaces=false}
+\title[STTRPSD]{Truck and trailer routing\\with satellite depots}
+\subtitle{STTRPSD --- Metaheuristics course project}
+\author{Andon Tchechmedjiev}
+\institute{IMT Mines Al\`es}
+\date{Three sessions}
+\hypersetup{pdftitle={STTRPSD metaheuristics course project},
+ pdfauthor={Andon Tchechmedjiev},pdfsubject={Combinatorial optimization}}
+\begin{document}
+\imttitlepage
+
+\section*{The routing problem}
+\begin{frame}{One vehicle and two kinds of trip}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.56\textwidth}
+\centering
+\begin{tikzpicture}[x=0.54cm,y=0.65cm,>=Stealth,
+ dep/.style={rectangle,draw=imtDarkBlue,fill=imtDarkBlue,text=white,minimum size=6mm,font=\small},
+ sat/.style={rectangle,draw=imtBlue,fill=imtGrey,minimum size=6mm,font=\small},
+ cust/.style={circle,draw=imtDarkBlue,fill=white,minimum size=6mm,font=\small}]
+\node[dep] (d) at (0,0) {0};
+\node[sat] (s1) at (2,0) {1};
+\node[sat] (s2) at (8,0) {2};
+\node[cust] (c3) at (2,3) {3};
+\node[cust] (c4) at (4.5,3) {4};
+\node[cust] (c5) at (8,4) {5};
+\node[cust] (c6) at (11,4) {6};
+\draw[imtDarkBlue,very thick,->] (d)--(s1);
+\draw[imtDarkBlue,very thick,->] (s1)--(s2);
+\draw[imtDarkBlue,very thick,->] (s2.south) to[bend left=28] (d.south);
+\draw[imtBlue,thick,->] (s1)--(c3);
+\draw[imtBlue,thick,->] (c3)--(c4);
+\draw[imtBlue,thick,->] (c4)--(s1);
+\draw[imtBlue,thick,->] (s2) to[bend left=9] (c5);
+\draw[imtBlue,thick,->] (c5) to[bend left=9] (s2);
+\draw[imtRed,thick,->] (s2) to[bend right=8] (c6);
+\draw[imtRed,thick,->] (c6) to[bend right=8] (s2);
+\node[font=\scriptsize,anchor=south] at (2,3.35) {$q_3=6$};
+\node[font=\scriptsize,anchor=south] at (4.5,3.35) {$q_4=4$};
+\node[font=\scriptsize,anchor=south] at (8,4.35) {$q_5=8$};
+\node[font=\scriptsize,anchor=south] at (11,4.35) {$q_6=7$};
+\node[font=\scriptsize,anchor=south] at (0,0.6) {Main depot};
+\node[font=\scriptsize,anchor=north] at (5,-1.35) {Dark: truck + trailer\quad Colour: truck only};
+\end{tikzpicture}
+\par\small Truck capacity $Q_V=10$: the trips carry $10$, $8$, and $7$.
+\end{column}
+\begin{column}{0.41\textwidth}
+\begin{block}{The vehicle's journey}
+\begin{itemize}
+\item Truck and trailer visit selected satellites.
+\item The trailer stays parked while the truck serves customers.
+\item Each truck trip returns to its starting satellite.
+\item Every customer is served exactly once.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{The optimization problem}
+\begin{block}{Minimize the complete distance}
+\[
+\min\quad \underbrace{\text{main-tour distance}}_{\text{truck + trailer}}
++\underbrace{\text{sum of truck-trip distances}}_{\text{truck only}}
+\]
+\end{block}
+Choose the satellites and their order, assign customers to trips, and order the customers within each trip.
+\begin{itemize}
+\item Each truck trip carries at most $Q_V$.
+\item The main tour starts and ends at depot 0, visiting each chosen satellite once.
+\item Distances are Euclidean, \textbf{without integer rounding}.
+\item The scorer checks feasibility and recomputes the full distance.
+\end{itemize}
+{\tiny Villegas et al. (2010), \emph{Engineering Applications of Artificial Intelligence} 23, 780--794.\quad
+\url{https://doi.org/10.1016/j.engappai.2010.01.013}\par}
+\end{frame}
+
+\section*{Project work}
+\begin{frame}{Greedy construction, local search, then a metaheuristic}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.315\textwidth}
+\begin{block}{1. Greedy construction}
+Implement a rule that constructs feasible routes.
+
+Validate the constructor on the ten practice instances and record a baseline.
+\end{block}
+\end{column}
+\begin{column}{0.315\textwidth}
+\begin{block}{2. Local search}
+Improve routes with relocation, swap, 2-opt, or other justified moves.
+
+Compare the results with the greedy constructor.
+\end{block}
+\end{column}
+\begin{column}{0.315\textwidth}
+\begin{block}{3. Metaheuristic}
+Implement a genetic, population-based, swarm, or other justified metaheuristic.
+
+Compare all three stages under the \textbf{30-second budget}.
+\end{block}
+\end{column}
+\end{columns}
+Reuse your constructor and local-search operators. The paper you pitched can guide the final method.
+\begin{alertblock}{Project focus}
+Design and evaluate a metaheuristic. The statement's integer model is an optional aid to understanding the constraints.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}[fragile]{The solver interface and benchmark}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.49\textwidth}
+\begin{block}{A common interface}
+\begin{lstlisting}
+solve --instance instance.json
+      --solution solution.json
+      --seed 0 --time-limit 30
+\end{lstlisting}
+Solvers can use any programming language.
+\end{block}
+\begin{exampleblock}{A main tour and rooted truck trips}
+\[
+\begin{aligned}
+M&=(0,1,2,0),\\
+r_1&=(1;3,4),\\
+r_2&=(2;5),\qquad r_3=(2;6).
+\end{aligned}
+\]
+Trip format: (satellite; customers).
+\end{exampleblock}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{itemize}
+\item \textbf{10 practice instances} for every team.
+\item \textbf{10 other assessment instances} with similar characteristics.
+\item \textbf{30 seconds per run}, including startup.
+\item Three common seeds and one CPU core.
+\item Failed or invalid runs earn zero for that run.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\section*{Assessment}
+\begin{frame}{Five-minute exchanges with every group}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.62\textwidth}
+\begin{imttable}{Q[l]Q[c]Q[c]Q[c]}
+Exchange & S1 & S2 & S3\\
+11:30--11:35 & G4 & G5 & G6\\
+11:36--11:41 & G1 & G3 & G7\\
+11:42--11:47 & G2 & G7 & G5\\
+11:48--11:53 & G7 & G6 & G2\\
+11:54--11:59 & G6 & G4 & G3\\
+12:00--12:05 & G3 & G1 & G4\\
+12:06--12:11 & G5 & G2 & G1\\
+\end{imttable}
+\end{column}
+\begin{column}{0.35\textwidth}
+\begin{alertblock}{During the exchange}
+Every member answers.
+
+No computers, phones, or notes.
+\end{alertblock}
+One minute between groups. Other groups continue working.
+\end{column}
+\end{columns}
+Including the paper pitch, every group has mean position 4. No group repeats an oral position.
+\end{frame}
+
+\begin{frame}{The final mark out of 20}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.62\textwidth}
+\begin{imttable}{X[l]Q[c]Q[c]}
+Component & Raw & Final\\
+Participation $P$ & /20 & /10\\
+Code $C$ & /4 & /2\\
+Report $R$ & /8 & /4\\
+Benchmark performance $K$ & /8 & /4\\
+\end{imttable}
+\end{column}
+\begin{column}{0.35\textwidth}
+\begin{block}{Combine the raw marks}
+\[
+G=\frac{P+C+R+K}{2}
+\]
+\end{block}
+\begin{exampleblock}{Participation}
+Paper pitch and three exchanges: \textbf{four marks out of~5}.
+\end{exampleblock}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{The report has five sections}
+\begin{enumerate}
+\item \textbf{Method description}: representation, construction, search, and stopping rule.
+\item \textbf{Benchmarking and results}: protocol, repeated runs, tables, and figures.
+\item \textbf{Analysis and conclusions}: explain the results, tradeoffs, and limitations.
+\item \textbf{Instructions to run the programme}: dependencies and exact commands.
+\item \textbf{One page on generative AI}: your interactions, checks, and each student's contribution.
+\end{enumerate}
+\end{frame}
+
+\section*{Getting started}
+\begin{frame}{Session 1: a greedy solver}
+\begin{enumerate}
+\item Score the supplied toy solution and account for every cost term.
+\item Choose a greedy decision rule and implement your constructor.
+\item Validate all ten practice instances and record the baseline results.
+\item Explain each decision and identify a neighbourhood for Session 2.
+\end{enumerate}
+\begin{block}{Be ready to explain your method}
+Every member should be able to explain the greedy rule and why the resulting routes are feasible.
+\end{block}
+\end{frame}
+\end{document}
