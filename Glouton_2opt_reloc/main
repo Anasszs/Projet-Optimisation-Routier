@@ -1,0 +1,369 @@
+"""Comparatif des algorithmes sur toutes les instances.
+
+Lance, pour chaque instance et chaque graine, les scripts :
+    1. glouton.py                       (glouton simple)
+    2. glouton_tous_satellites.py       (glouton "tous les satellites")
+    3. glouton_2opt.py                  (glouton + 2-opt)
+    4. glouton_2opt_reloc.py            (glouton + 2-opt + relocalisation de clients)
+
+Chaque script est lance en sous-processus avec l'interface commune
+    --instance X --solution Y --seed S --time-limit T
+puis sa solution est relue et verifiee par NOTRE verificateur (faisabilite
+complete + recalcul du cout). Une execution est "valide" seulement si le
+processus se termine avant la limite, ecrit un JSON conforme et faisable.
+
+Sorties (dossier --output, par defaut output/) :
+    resultats.csv     une ligne par execution (algo, instance, graine, cout, temps, statut)
+    tableau.md        les tableaux comparatifs
+    <algo>/<instance>_s<graine>.json   les solutions, a passer aussi au scorer officiel
+
+Instances : lues dans instances/public_manifest.json (fichiers cherches dans le
+dossier du manifeste). Scripts : cherches dans la racine puis dans Solutions/.
+
+Utilisation (depuis la racine du projet) :
+    python main.py
+    python main.py --seeds 0 --time-limit 30
+    python main.py --manifest instances/public_manifest.json
+    python main.py --instances instances/STTRP-25-5-1-rd.json   (une seule instance)
+    python main.py --tous Solutions/glouton_tous_satellites.py
+    python main.py --reloc Solutions/glouton_2opt_reloc.py
+"""
+
+import argparse
+import csv
+import glob
+import json
+import os
+import statistics
+import subprocess
+import sys
+import time
+
+import hashlib  # noqa: E402
+
+ICI = os.path.dirname(os.path.abspath(__file__))
+# glouton_2opt.py peut etre a cote de main.py ou dans Solutions/
+for _d in (ICI, os.path.join(ICI, "Solutions"),
+           os.getcwd(), os.path.join(os.getcwd(), "Solutions")):
+    if _d not in sys.path:
+        sys.path.append(_d)
+from glouton_2opt import preparer, cout_total, verifier  # noqa: E402
+
+CHAMPS_ATTENDUS = {"schema_version", "instance", "main_route", "truck_routes"}
+CHAMPS_ACCEPTES = CHAMPS_ATTENDUS | {"metadata"}
+
+# (cle, nom affiche, emplacements recherches par defaut)
+ALGOS = [
+    ("simple", "Glouton simple",
+     ["glouton.py", "Solutions/glouton.py"]),
+    ("tous", "Glouton tous satellites",
+     ["glouton_tous_satellites.py", "Solutions/glouton_tous_satellites.py"]),
+    ("2opt", "Glouton + 2-opt",
+     ["glouton_2opt.py", "Solutions/glouton_2opt.py"]),
+    ("reloc", "Glouton + 2-opt + reloc",
+     ["glouton_2opt_reloc.py", "Solutions/glouton_2opt_reloc.py"]),
+]
+
+
+def trouver_script(choisi, candidats):
+    """Chemin donne en option, sinon premier emplacement par defaut qui existe."""
+    if choisi:
+        return choisi if os.path.exists(choisi) else None
+    for c in candidats:
+        for base in (os.getcwd(), ICI):
+            p = os.path.join(base, c)
+            if os.path.exists(p):
+                return p
+    return None
+
+
+def lister_instances(entrees):
+    """Fichiers JSON d'instance (dossier ou fichiers), tries par nom."""
+    fichiers = []
+    for e in entrees:
+        if os.path.isdir(e):
+            fichiers += glob.glob(os.path.join(e, "*.json"))
+        else:
+            fichiers.append(e)
+    instances = []
+    for f in sorted(fichiers):
+        try:
+            with open(f, encoding="utf-8-sig") as fh:
+                inst = json.load(fh)
+        except (OSError, ValueError):
+            continue
+        if isinstance(inst, dict) and {"depot", "satellites", "customers"} <= set(inst):
+            instances.append((f, inst))
+    return instances
+
+
+def chercher_fichier(nom, base):
+    """Fichier `nom` dans `base`, puis ses sous-dossiers, puis ./instances, puis ./"""
+    for dossier in (base, os.path.join(os.getcwd(), "instances"), os.getcwd()):
+        direct = os.path.join(dossier, nom)
+        if os.path.isfile(direct):
+            return direct
+        trouves = glob.glob(os.path.join(dossier, "**", nom), recursive=True)
+        if trouves:
+            return sorted(trouves)[0]
+    return None
+
+
+def lister_depuis_manifeste(chemin_manifeste):
+    """Instances listees dans le manifeste, dans l'ordre du manifeste.
+
+    Les fichiers sont cherches dans le dossier du manifeste. Le sha256 et le nom
+    indiques dans le manifeste sont compares au fichier lu : un ecart donne un
+    avertissement, pas une erreur."""
+    with open(chemin_manifeste, encoding="utf-8-sig") as f:
+        manifeste = json.load(f)
+    base = os.path.dirname(os.path.abspath(chemin_manifeste))
+    instances = []
+    for entree in manifeste["instances"]:
+        chemin = chercher_fichier(entree["file"], base)
+        if chemin is None:
+            print(f"[!] instance du manifeste introuvable : {entree['file']} "
+                  f"(cherchee dans {base} et ses sous-dossiers)")
+            continue
+        with open(chemin, "rb") as f:
+            contenu = f.read()
+        attendu = entree.get("sha256")
+        if attendu and hashlib.sha256(contenu).hexdigest() != attendu:
+            print(f"[!] sha256 different de celui du manifeste : {entree['file']}")
+        inst = json.loads(contenu.decode("utf-8-sig"))
+        if "name" in entree and inst.get("name") != entree["name"]:
+            print(f"[!] nom different du manifeste dans {entree['file']} : "
+                  f"{inst.get('name')} au lieu de {entree['name']}")
+        instances.append((chemin, inst))
+    return instances
+
+
+def executer(script, chemin_inst, inst, coord, demande, sortie, seed, limite):
+    """Une execution. Renvoie un dict : valide, cout, temps, raison."""
+    if os.path.exists(sortie):
+        os.remove(sortie)
+    os.makedirs(os.path.dirname(sortie), exist_ok=True)
+    cmd = [sys.executable, script, "--instance", chemin_inst, "--solution", sortie,
+           "--seed", str(seed), "--time-limit", str(limite)]
+    t0 = time.time()
+    try:
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=limite)
+    except subprocess.TimeoutExpired:
+        return {"valide": False, "cout": None, "temps": time.time() - t0,
+                "raison": "timeout"}
+    temps = time.time() - t0
+
+    def echec(raison):
+        return {"valide": False, "cout": None, "temps": temps, "raison": raison}
+
+    if p.returncode != 0:
+        derniere = (p.stderr.strip().splitlines() or ["?"])[-1]
+        return echec(f"plantage : {derniere}")
+    if not os.path.exists(sortie):
+        return echec("pas de fichier de sortie")
+    try:
+        with open(sortie, encoding="utf-8") as f:
+            sol = json.load(f)
+    except ValueError:
+        return echec("JSON mal forme")
+
+    if not isinstance(sol, dict):
+        return echec("la solution n'est pas un objet JSON")
+    inconnus = set(sol) - CHAMPS_ACCEPTES
+    manquants = CHAMPS_ATTENDUS - set(sol)
+    if inconnus:
+        return echec(f"champs inconnus : {sorted(inconnus)}")
+    if manquants:
+        return echec(f"champs manquants : {sorted(manquants)}")
+    if sol["instance"] != inst["name"]:
+        return echec("champ 'instance' different du nom de l'instance")
+    try:
+        erreurs = verifier(inst, sol, demande)
+        cout = cout_total(sol, coord)
+    except Exception as e:  # structure inattendue (cle absente, mauvais type...)
+        return echec(f"format invalide : {type(e).__name__}")
+    if erreurs:
+        return echec("infaisable : " + " ; ".join(erreurs[:2]))
+    return {"valide": True, "cout": cout, "temps": temps, "raison": ""}
+
+
+def moyenne_valide(runs):
+    return statistics.mean(r["cout"] for r in runs if r["valide"])
+
+
+def cellule_cout(runs):
+    n_ok = sum(r["valide"] for r in runs)
+    if n_ok == 0:
+        return "ECHEC"
+    txt = f"{moyenne_valide(runs):.2f}"
+    return txt if n_ok == len(runs) else f"{txt} ({n_ok}/{len(runs)})"
+
+
+def tableau_md(entetes, lignes):
+    """Tableau markdown aligne."""
+    cols = list(zip(*([entetes] + lignes)))
+    larg = [max(len(str(x)) for x in col) for col in cols]
+    def fmt(l):
+        return "| " + " | ".join(str(x).ljust(w) for x, w in zip(l, larg)) + " |"
+    sep = "| " + " | ".join("-" * w for w in larg) + " |"
+    return "\n".join([fmt(entetes), sep] + [fmt(l) for l in lignes])
+
+
+def gain(avant, apres):
+    if avant is None or apres is None or avant == 0:
+        return "-"
+    return f"{100 * (avant - apres) / avant:+.2f}"
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--manifest", default="instances/public_manifest.json",
+                        help="manifeste listant les instances (defaut : "
+                             "instances/public_manifest.json)")
+    parser.add_argument("--instances", nargs="+", default=None,
+                        help="dossier(s) ou fichiers JSON d'instances "
+                             "(remplace le manifeste)")
+    parser.add_argument("--seeds", nargs="+", type=int, default=[0, 1, 2])
+    parser.add_argument("--time-limit", type=float, default=30)
+    parser.add_argument("--output", default="output")
+    parser.add_argument("--glouton", help="chemin de glouton.py")
+    parser.add_argument("--tous", help="chemin de glouton_tous_satellites.py")
+    parser.add_argument("--deuxopt", help="chemin de glouton_2opt.py")
+    parser.add_argument("--reloc", help="chemin de glouton_2opt_reloc.py")
+    args = parser.parse_args()
+
+    if args.instances:
+        instances = lister_instances(args.instances)
+        if not instances:
+            sys.exit(f"Aucune instance JSON trouvee dans {args.instances}.")
+    else:
+        manifeste = None
+        racines = [os.getcwd(), os.path.join(os.getcwd(), "Solutions"),
+                   ICI, os.path.join(ICI, "Solutions"), os.path.dirname(ICI)]
+        for base in racines:
+            p = os.path.join(base, args.manifest)
+            if os.path.exists(p):
+                manifeste = p
+                break
+        if manifeste is None:
+            sys.exit(f"Manifeste introuvable : {args.manifest} "
+                     "(lancez depuis la racine du projet, ou utilisez "
+                     "--manifest CHEMIN / --instances DOSSIER).")
+        print(f"[ok] manifeste : {manifeste}")
+        instances = lister_depuis_manifeste(manifeste)
+        if not instances:
+            sys.exit("Aucune instance du manifeste n'a pu etre lue.")
+
+    scripts = {}
+    choix = (args.glouton, args.tous, args.deuxopt, args.reloc)
+    for (cle, nom, defauts), choisi in zip(ALGOS, choix):
+        chemin = trouver_script(choisi, defauts)
+        if chemin is None:
+            print(f"[!] script introuvable pour '{nom}' : ignore "
+                  f"(utilisez l'option de chemin correspondante)")
+        else:
+            scripts[cle] = chemin
+            print(f"[ok] {nom} : {chemin}")
+    if not scripts:
+        sys.exit("Aucun script a lancer.")
+    algos = [(c, n) for c, n, _ in ALGOS if c in scripts]
+
+    print(f"\n{len(instances)} instances, graines {args.seeds}, "
+          f"limite {args.time_limit} s par execution\n")
+
+    runs = {c: {} for c, _ in algos}       # runs[algo][instance] = [dict par graine]
+    lignes_csv = []
+    for chemin_inst, inst in instances:
+        nom_inst = inst["name"]
+        coord, demande = preparer(inst)
+        for cle, nom in algos:
+            res = []
+            for seed in args.seeds:
+                sortie = os.path.join(args.output, cle, f"{nom_inst}_s{seed}.json")
+                r = executer(scripts[cle], chemin_inst, inst, coord, demande,
+                             sortie, seed, args.time_limit)
+                res.append(r)
+                lignes_csv.append([cle, nom_inst, seed,
+                                   "" if r["cout"] is None else f"{r['cout']:.9f}",
+                                   f"{r['temps']:.3f}",
+                                   "valide" if r["valide"] else "INVALIDE", r["raison"]])
+                if not r["valide"]:
+                    print(f"  [!] {nom} | {nom_inst} | graine {seed} : {r['raison']}")
+            runs[cle][nom_inst] = res
+        print(f"  {nom_inst} termine")
+
+    os.makedirs(args.output, exist_ok=True)
+    with open(os.path.join(args.output, "resultats.csv"), "w", newline="",
+              encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["algo", "instance", "graine", "cout", "temps_s", "statut", "raison"])
+        w.writerows(lignes_csv)
+
+    noms_inst = [inst["name"] for _, inst in instances]
+
+    # ---- Tableau 1 : objectifs moyens ----
+    # colonnes de gain : (cle de gauche, cle de droite, titre)
+    paires = [("simple", "tous", "Gain tous/simple (%)"),
+              ("tous", "2opt", "Gain 2-opt/tous (%)"),
+              ("2opt", "reloc", "Gain reloc/2-opt (%)")]
+    paires = [p for p in paires if p[0] in runs and p[1] in runs]
+
+    ent1 = ["Instance"] + [n for _, n in algos] + [t for _, _, t in paires]
+    l1 = []
+    for ni in noms_inst:
+        ligne = [ni] + [cellule_cout(runs[c][ni]) for c, _ in algos]
+        moy = {c: (moyenne_valide(runs[c][ni]) if any(r["valide"] for r in runs[c][ni])
+                   else None) for c, _ in algos}
+        for a, b, _ in paires:
+            ligne.append(gain(moy[a], moy[b]))
+        l1.append(ligne)
+
+    # ---- Tableau 2 : temps moyen ----
+    ent2 = ["Instance"] + [n for _, n in algos]
+    l2 = [[ni] + [f"{statistics.mean(r['temps'] for r in runs[c][ni]):.3f}"
+                  for c, _ in algos] for ni in noms_inst]
+
+    # ---- Tableau 3 : synthese (score relatif, faisabilite) ----
+    # u = min(1, meilleur / cout) parmi NOS methodes, par instance et graine ; 0 si invalide.
+    u = {c: [] for c, _ in algos}
+    for ni in noms_inst:
+        for k in range(len(args.seeds)):
+            valides = [runs[c][ni][k]["cout"] for c, _ in algos if runs[c][ni][k]["valide"]]
+            meilleur = min(valides) if valides else None
+            for c, _ in algos:
+                r = runs[c][ni][k]
+                if r["valide"] and meilleur is not None:
+                    u[c].append(1.0 if meilleur == r["cout"] == 0
+                                else min(1.0, meilleur / r["cout"]))
+                else:
+                    u[c].append(0.0)
+    ent3 = ["Methode", "Executions valides", "Score relatif moyen (0-1)", "Temps moyen (s)"]
+    l3 = []
+    for c, n in algos:
+        toutes = [r for ni in noms_inst for r in runs[c][ni]]
+        l3.append([n, f"{sum(r['valide'] for r in toutes)}/{len(toutes)}",
+                   f"{statistics.mean(u[c]):.4f}",
+                   f"{statistics.mean(r['temps'] for r in toutes):.3f}"])
+
+    texte = "\n\n".join([
+        f"# Comparatif ({len(noms_inst)} instances, graines {args.seeds}, "
+        f"limite {args.time_limit:g} s)",
+        "## Objectif moyen sur les graines (distance totale)\n\n" + tableau_md(ent1, l1)
+        + "\n\nUne mention (k/n) indique que seules k executions sur n sont valides. "
+          "Gain positif = plus court que la methode de gauche.",
+        "## Temps d'execution moyen (s)\n\n" + tableau_md(ent2, l2),
+        "## Synthese\n\n" + tableau_md(ent3, l3)
+        + f"\n\nScore relatif = min(1, meilleur des {len(algos)} methodes ci-dessus / cout), "
+          "0 si l'execution est invalide. C'est une version restreinte a nos methodes de la "
+          "note de performance du projet, pas la note officielle.",
+    ])
+    with open(os.path.join(args.output, "tableau.md"), "w", encoding="utf-8") as f:
+        f.write(texte + "\n")
+    print("\n" + texte)
+    print(f"\nFichiers : {args.output}/tableau.md, {args.output}/resultats.csv, "
+          f"solutions dans {args.output}/<algo>/")
+
+
+if __name__ == "__main__":
+    main()
