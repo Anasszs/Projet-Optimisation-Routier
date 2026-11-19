@@ -117,6 +117,26 @@ The constructors are starting points for **Session 1, greedy methods**. `nearest
 
 PowerShell's `$LASTEXITCODE` immediately after a Python command shows its exit status: `0` means success; `score` uses `2` for invalid input or an infeasible solution. Do not continue with a failed construction simply because an older file happens to be present. If asking for help, include the exact command, the error text, the Python version, and the working directory.
 
+## Interactive greedy route lab
+
+Open **[interactive/greedy_lab.html](interactive/greedy_lab.html)** in a modern browser. Download the file first (GitHub's **Download raw file** button), or open it from the extracted repository. It is a self-contained HTML5/JavaScript application: the logo, interface, routing engine, worked example and all ten public instances are embedded. It works offline and requires no installation or server.
+
+![Manual route construction in the greedy lab](interactive/greedy_lab_preview.png)
+
+The lab supports three complementary activities:
+
+- **Build a solution:** select a satellite, start a truck trip and add customers manually. Customer labels show both ID and demand (for example, `C3 · q=6`), while the map displays the active trip's load/capacity and remaining capacity. Inspect the proposed arcs, marginal distance, demand and remaining capacity before committing. Reorder the main tour or a truck trip, move customers between trips, change a trip's satellite, and undo or redo edits.
+- **Compare policies:** compare nearest neighbour, cheapest closed-trip addition, addition per unit demand, largest demand first, farthest from satellite, and append-based savings. Run the same six rules on one instance or on all ten public instances. Customer assignments and the main-tour rule remain fixed within each comparison; the tables show complete objective values and equally weighted relative costs, rather than an optimality claim or course mark. Results can be downloaded as CSV.
+- **Learn the reasoning:** follow worked calculations and an empirical worksheet connecting greedy choices to load packing, the return leg, satellite selection and subsequent local search.
+
+Import a canonical instance JSON or an original benchmark `.dat` file to work on another instance. **Save workspace** keeps the current instance, draft and named designs in a downloadable JSON file; reopen it to continue later. Browser-session work is not automatically saved to disk. **Export feasible solution** is enabled only after all routing checks pass and writes the exact format accepted by the Python scorer. For example, after saving a toy solution in `output/toy_manual_solution.json`, run:
+
+```bash
+python3 -m sttrpsd score --instance "examples/toy.json" --solution "output/toy_manual_solution.json"
+```
+
+In Windows PowerShell, use `py -3` instead of `python3`. Partial plans are labelled as drafts and their distance is not a final score. The JavaScript demonstrations are deterministic constructors; use the Python benchmark harness for the course's **30-second** executable-solver evaluation. The lab's engine is checked against the independent Python scorer, including all six policies and both general satellite rules on the ten public instances.
+
 ## Project progression
 
 | Session | Main task | Evidence to keep |
