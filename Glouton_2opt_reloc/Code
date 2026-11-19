@@ -1,0 +1,388 @@
+"""STTRPSD : glouton "tous les satellites" puis recherche locale (2-opt + relocalisation).
+
+Etape 1 (glouton) : tous les satellites sont visites (plus proche voisin depuis
+le depot), chaque client va a son satellite le plus proche, puis tournees camion
+au plus proche voisin sous contrainte de capacite.
+
+Etape 2 (recherche locale) :
+  a) nettoyage : on retire de la tournee principale les satellites sans tournee ;
+  b) boucle d'amelioration sur les tournees camion, tant que quelque chose s'ameliore :
+       - RELOCALISATION : on deplace un client vers une autre position, soit dans sa
+         propre tournee, soit dans une autre tournee (du meme satellite ou d'un autre),
+         soit dans une nouvelle tournee creee a un satellite deja visite.
+         Le deplacement n'est accepte que si la capacite du camion cible est respectee ;
+       - 2-opt sur chaque tournee camion (extremites fixes = le satellite) ;
+  c) nouveau nettoyage (la relocalisation peut vider un satellite), puis 2-opt sur la
+     tournee principale (extremites fixes = le depot).
+
+La relocalisation modifie les charges : la capacite est donc verifiee a chaque
+deplacement. Le 2-opt, lui, ne la change pas.
+
+Utilisation (depuis la racine du projet) :
+    python glouton_2opt_reloc.py --instance examples/toy.json --solution output/toy.json
+    python glouton_2opt_reloc.py --instance ... --solution ... --mode glouton
+    python glouton_2opt_reloc.py --instance ... --solution ... --mode 2opt
+    python glouton_2opt_reloc.py --instance ... --solution ... --verify
+"""
+
+import argparse
+import copy
+import json
+import math
+import os
+import time
+
+EPS = 1e-9
+
+
+# --------------------------------------------------------------------------
+# Donnees et distances
+# --------------------------------------------------------------------------
+
+def preparer(inst):
+    """Dictionnaires id -> (x, y) et id -> demande."""
+    coord = {inst["depot"]["id"]: (inst["depot"]["x"], inst["depot"]["y"])}
+    for s in inst["satellites"]:
+        coord[s["id"]] = (s["x"], s["y"])
+    demande = {}
+    for c in inst["customers"]:
+        coord[c["id"]] = (c["x"], c["y"])
+        demande[c["id"]] = c["demand"]
+    return coord, demande
+
+
+def d(coord, a, b):
+    """Distance euclidienne non arrondie entre deux identifiants."""
+    (xa, ya), (xb, yb) = coord[a], coord[b]
+    return math.hypot(xa - xb, ya - yb)
+
+
+# --------------------------------------------------------------------------
+# Cout complet et verification (notre "scorer" maison)
+# --------------------------------------------------------------------------
+
+def cout_total(sol, coord):
+    """Tournee principale + toutes les tournees camion, retours inclus."""
+    main = sol["main_route"]
+    total = sum(d(coord, main[i], main[i + 1]) for i in range(len(main) - 1))
+    for r in sol["truck_routes"]:
+        p = [r["satellite"]] + r["customers"] + [r["satellite"]]
+        total += sum(d(coord, p[i], p[i + 1]) for i in range(len(p) - 1))
+    return total
+
+
+def verifier(inst, sol, demande):
+    """Liste d'erreurs de faisabilite (liste vide = solution faisable)."""
+    erreurs = []
+    depot = inst["depot"]["id"]
+    sats = {s["id"] for s in inst["satellites"]}
+    QV = inst["truck_capacity"]
+    main = sol["main_route"]
+
+    if len(main) < 3 or main[0] != depot or main[-1] != depot:
+        erreurs.append("main_route doit commencer et finir au depot, avec >= 1 satellite")
+    inner = main[1:-1]
+    if len(set(inner)) != len(inner):
+        erreurs.append("satellite repete dans main_route")
+    if any(s not in sats for s in inner):
+        erreurs.append("main_route contient autre chose que des satellites")
+
+    vus = []
+    for k, r in enumerate(sol["truck_routes"]):
+        if r["satellite"] not in inner:
+            erreurs.append(f"tournee {k} : satellite racine absent de main_route")
+        if not r["customers"]:
+            erreurs.append(f"tournee {k} vide")
+        charge = sum(demande.get(c, 0) for c in r["customers"])
+        if charge > QV + 1e-9 * max(1, QV):
+            erreurs.append(f"tournee {k} : charge {charge} > {QV}")
+        vus += r["customers"]
+
+    attendus = set(demande)
+    manquants = attendus - set(vus)
+    inconnus = set(vus) - attendus
+    doublons = [c for c in set(vus) if vus.count(c) > 1]
+    if manquants:
+        erreurs.append(f"clients manquants : {sorted(manquants)}")
+    if doublons:
+        erreurs.append(f"clients en double : {sorted(doublons)}")
+    if inconnus:
+        erreurs.append(f"identifiants inconnus : {sorted(inconnus)}")
+    return erreurs
+
+
+# --------------------------------------------------------------------------
+# Etape 1 : glouton
+# --------------------------------------------------------------------------
+
+def glouton(inst, coord, demande):
+    depot = inst["depot"]["id"]
+    sats = [s["id"] for s in inst["satellites"]]
+    QV = inst["truck_capacity"]
+
+    # ordre des satellites : plus proche voisin depuis le depot
+    ordre, restants, pos = [], list(sats), depot
+    while restants:
+        s = min(restants, key=lambda s: d(coord, pos, s))
+        ordre.append(s)
+        restants.remove(s)
+        pos = s
+
+    # chaque client -> satellite le plus proche
+    affectation = {s: [] for s in sats}
+    for c in inst["customers"]:
+        s = min(sats, key=lambda s: d(coord, s, c["id"]))
+        affectation[s].append(c["id"])
+
+    # tournees camion au plus proche voisin
+    tournees = []
+    for s in ordre:
+        non_servis = list(affectation[s])
+        while non_servis:
+            tournee, charge, pos = [], 0, s
+            while True:
+                cand = [c for c in non_servis if charge + demande[c] <= QV]
+                if not cand:
+                    break
+                c = min(cand, key=lambda c: d(coord, pos, c))
+                tournee.append(c)
+                charge += demande[c]
+                pos = c
+                non_servis.remove(c)
+            tournees.append({"satellite": s, "customers": tournee})
+
+    return {
+        "schema_version": 1,
+        "instance": inst["name"],
+        "main_route": [depot] + ordre + [depot],
+        "truck_routes": tournees,
+    }
+
+
+# --------------------------------------------------------------------------
+# Etape 2a : 2-opt
+# --------------------------------------------------------------------------
+
+def two_opt(seq, ancre, coord, deadline):
+    """2-opt (premiere amelioration) sur le cycle  ancre -> seq -> ancre.
+
+    `seq` est modifiee en place. Renvoie la somme des deltas appliques
+    (negative si la tournee a ete raccourcie).
+
+    p = [ancre] + seq + [ancre] ; inverser p[i..j] remplace les aretes
+    (p[i-1], p[i]) et (p[j], p[j+1]) par (p[i-1], p[j]) et (p[i], p[j+1]).
+    """
+    total_delta = 0.0
+    while time.time() < deadline:
+        p = [ancre] + seq + [ancre]
+        m = len(seq)
+        trouve = False
+        for i in range(1, m):
+            for j in range(i + 1, m + 1):
+                delta = (d(coord, p[i - 1], p[j]) + d(coord, p[i], p[j + 1])
+                         - d(coord, p[i - 1], p[i]) - d(coord, p[j], p[j + 1]))
+                if delta < -EPS:
+                    p[i:j + 1] = reversed(p[i:j + 1])
+                    seq[:] = p[1:-1]
+                    total_delta += delta
+                    trouve = True
+                    break
+            if trouve:
+                break
+        if not trouve:
+            break  # optimum local pour le 2-opt
+    return total_delta
+
+
+# --------------------------------------------------------------------------
+# Etape 2b : relocalisation de clients
+# --------------------------------------------------------------------------
+
+def _chercher_relocalisation(tournees, sats_visites, coord, demande, QV):
+    """Cherche le premier deplacement de client qui raccourcit la solution.
+
+    Renvoie (a, i, cible, j, delta) ou None, avec :
+      a, i   : tournee source et position du client dans p = [sat] + clients + [sat]
+      cible  : indice de la tournee cible, ou ("nouvelle", satellite)
+      j      : position d'insertion dans la tournee cible (entre q[j] et q[j+1])
+      delta  : variation de distance (negative = amelioration)
+    """
+    charges = [sum(demande[c] for c in r["customers"]) for r in tournees]
+
+    for a, ra in enumerate(tournees):
+        pa = [ra["satellite"]] + ra["customers"] + [ra["satellite"]]
+        for i in range(1, len(pa) - 1):
+            c = pa[i]
+            # gain obtenu en retirant c de sa tournee
+            gain = (d(coord, pa[i - 1], c) + d(coord, c, pa[i + 1])
+                    - d(coord, pa[i - 1], pa[i + 1]))
+
+            # 1) insertion dans une tournee existante (la meme ou une autre)
+            for b, rb in enumerate(tournees):
+                if b == a:
+                    q = pa[:i] + pa[i + 1:]          # tournee sans c
+                else:
+                    if charges[b] + demande[c] > QV:  # capacite
+                        continue
+                    q = [rb["satellite"]] + rb["customers"] + [rb["satellite"]]
+                for j in range(len(q) - 1):
+                    cout_ins = (d(coord, q[j], c) + d(coord, c, q[j + 1])
+                                - d(coord, q[j], q[j + 1]))
+                    delta = cout_ins - gain
+                    if delta < -EPS:
+                        return a, i, b, j, delta
+
+            # 2) creation d'une nouvelle tournee [c] a un satellite deja visite
+            #    (la demande d'un client est supposee <= QV)
+            for s in sats_visites:
+                delta = 2 * d(coord, s, c) - gain
+                if delta < -EPS:
+                    return a, i, ("nouvelle", s), 0, delta
+    return None
+
+
+def relocalisation(tournees, sats_visites, coord, demande, QV, deadline):
+    """Relocalisation (premiere amelioration) jusqu'a l'optimum local.
+
+    `tournees` est modifiee en place. Les tournees videes sont supprimees.
+    Renvoie la somme des deltas appliques (negative = gain).
+    """
+    total_delta = 0.0
+    while time.time() < deadline:
+        mouvement = _chercher_relocalisation(tournees, sats_visites, coord, demande, QV)
+        if mouvement is None:
+            break  # optimum local pour la relocalisation
+        a, i, cible, j, delta = mouvement
+        ra = tournees[a]
+        c = ra["customers"].pop(i - 1)
+
+        if isinstance(cible, tuple):                 # nouvelle tournee
+            tournees.append({"satellite": cible[1], "customers": [c]})
+        else:                                        # tournee existante
+            tournees[cible]["customers"].insert(j, c)
+
+        if not ra["customers"]:                      # tournee source videe
+            del tournees[a]
+        total_delta += delta
+    return total_delta
+
+
+# --------------------------------------------------------------------------
+# Etape 2c : nettoyage et orchestration
+# --------------------------------------------------------------------------
+
+def nettoyer_satellites(sol):
+    """Retire de main_route les satellites qui n'ont aucune tournee camion."""
+    utilises = {r["satellite"] for r in sol["truck_routes"]}
+    depot = sol["main_route"][0]
+    inner = [s for s in sol["main_route"][1:-1] if s in utilises]
+    sol["main_route"] = [depot] + inner + [depot]
+
+
+def _controle(nom, predit, avant, apres, verify):
+    if not verify:
+        return
+    reel = apres - avant
+    ok = abs(reel - predit) < 1e-6
+    print(f"[verify] {nom:<22} delta predit {predit:.9f} | reel {reel:.9f} | "
+          f"{'OK' if ok else 'ECART !'}")
+    assert ok, f"{nom} : le delta predit differe du recalcul complet"
+
+
+def recherche_locale(sol, inst, coord, demande, deadline, relocaliser=True, verify=False):
+    """Nettoyage, (relocalisation + 2-opt) sur les camions, 2-opt sur la tournee
+    principale. Renvoie une nouvelle solution."""
+    QV = inst["truck_capacity"]
+    sol = copy.deepcopy(sol)
+    nettoyer_satellites(sol)
+    sats_visites = list(sol["main_route"][1:-1])   # fixes pendant la phase camions
+
+    # --- phase tournees camion : on alterne jusqu'a stabilisation ---
+    cout_avant = cout_total(sol, coord)
+    delta_predit = 0.0
+    while time.time() < deadline:
+        g_reloc = 0.0
+        if relocaliser:
+            g_reloc = relocalisation(sol["truck_routes"], sats_visites,
+                                     coord, demande, QV, deadline)
+        g_2opt = 0.0
+        for r in sol["truck_routes"]:
+            g_2opt += two_opt(r["customers"], r["satellite"], coord, deadline)
+        delta_predit += g_reloc + g_2opt
+        if g_reloc > -EPS and g_2opt > -EPS:
+            break
+    _controle("camions (reloc+2opt)", delta_predit, cout_avant, cout_total(sol, coord), verify)
+
+    # --- la relocalisation a pu vider un satellite : on le retire ---
+    nettoyer_satellites(sol)
+
+    # --- tournee principale ---
+    cout_avant = cout_total(sol, coord)
+    depot = sol["main_route"][0]
+    inner = sol["main_route"][1:-1]
+    delta_main = two_opt(inner, depot, coord, deadline)
+    sol["main_route"] = [depot] + inner + [depot]
+    _controle("tournee principale", delta_main, cout_avant, cout_total(sol, coord), verify)
+    return sol
+
+
+# --------------------------------------------------------------------------
+# Programme principal
+# --------------------------------------------------------------------------
+
+def ecrire_solution(sol, chemin):
+    """Ecriture atomique : fichier temporaire puis renommage."""
+    dossier = os.path.dirname(chemin)
+    if dossier:
+        os.makedirs(dossier, exist_ok=True)
+    tmp = chemin + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump({k: sol[k] for k in
+                   ("schema_version", "instance", "main_route", "truck_routes")}, f)
+    os.replace(tmp, chemin)
+
+
+def main():
+    debut = time.time()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--instance", required=True)
+    parser.add_argument("--solution", required=True)
+    parser.add_argument("--seed", type=int, default=0)           # inutilise (deterministe)
+    parser.add_argument("--time-limit", type=float, default=30)
+    parser.add_argument("--mode", choices=["glouton", "2opt", "reloc"], default="reloc",
+                        help="glouton | 2opt (2-opt seul) | reloc (2-opt + relocalisation)")
+    parser.add_argument("--verify", action="store_true",
+                        help="compare les gains predits au recalcul complet")
+    args = parser.parse_args()
+
+    with open(args.instance, encoding="utf-8-sig") as f:
+        inst = json.load(f)
+    coord, demande = preparer(inst)
+
+    sol = glouton(inst, coord, demande)
+    cout_glouton = cout_total(sol, coord)
+
+    if args.mode in ("2opt", "reloc"):
+        marge = min(1.0, 0.1 * args.time_limit)   # reserve pour l'ecriture
+        sol = recherche_locale(sol, inst, coord, demande,
+                               debut + args.time_limit - marge,
+                               relocaliser=(args.mode == "reloc"),
+                               verify=args.verify)
+
+    erreurs = verifier(inst, sol, demande)
+    cout = cout_total(sol, coord)
+    ecrire_solution(sol, args.solution)
+
+    print(f"instance : {inst['name']}")
+    print(f"cout glouton   : {cout_glouton:.6f}")
+    if args.mode != "glouton":
+        gain = 100 * (cout_glouton - cout) / cout_glouton if cout_glouton else 0.0
+        print(f"cout apres {args.mode:<5}: {cout:.6f}  (gain {gain:.2f} %)")
+    print(f"faisable : {'oui' if not erreurs else 'NON'}")
+    for e in erreurs:
+        print("  erreur :", e)
+    print(f"temps : {time.time() - debut:.3f} s")
+
+
+if __name__ == "__main__":
+    main()
